@@ -116,11 +116,36 @@ public class RegistroTomaService {
 
     // ---------------------------------------------------------------
     // Validación RBAC a nivel de datos
+    // Permite acceso si el usuario tiene una relación directa con el adulto,
+    // O si el propio adulto mayor está accediendo a sus datos.
     // ---------------------------------------------------------------
     private void validarAcceso(Integer idUsuario, Integer idAdulto) {
-        if (!relacionRepository.validarAccesoUsuarioAdulto(idUsuario, idAdulto)) {
-            throw new UnauthorizedException(
-                    "No tienes acceso a los registros del adulto con id: " + idAdulto);
+        // 1. Check via relacion_usuario_adulto (Familiar / Cuidador)
+        if (relacionRepository.validarAccesoUsuarioAdulto(idUsuario, idAdulto)) {
+            return; // tiene acceso
         }
+        // 2. Check if this user IS the adulto mayor (self-access)
+        //    Buscar todos los adultos vinculados al usuario y ver si el idAdulto es uno de ellos
+        List<Integer> idsAdultos = relacionRepository.findByUsuario_IdUsuario(idUsuario)
+                .stream()
+                .map(r -> r.getAdulto().getIdAdulto())
+                .toList();
+        if (idsAdultos.contains(idAdulto)) {
+            return;
+        }
+        throw new UnauthorizedException(
+                "No tienes acceso a los registros del adulto con id: " + idAdulto);
+    }
+
+    /**
+     * Obtiene el idAdulto vinculado a un usuario con rol Adulto Mayor.
+     * Útil para que el frontend del adulto mayor pueda resolver su propio idAdulto.
+     */
+    public Integer obtenerIdAdultoPorUsuario(Integer idUsuario) {
+        return relacionRepository.findByUsuario_IdUsuario(idUsuario)
+                .stream()
+                .map(r -> r.getAdulto().getIdAdulto())
+                .findFirst()
+                .orElse(null);
     }
 }
