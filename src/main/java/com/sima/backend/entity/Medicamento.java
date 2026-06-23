@@ -10,6 +10,10 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Entidad que representa la tabla de medicamentos con horario y frecuencia de dosis.
+ * Implementación para HU-01: Recibir recordatorio de medicamento.
+ */
 @Entity
 @Table(name = "medicamentos")
 @Getter
