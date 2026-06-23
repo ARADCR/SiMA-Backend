@@ -43,6 +43,15 @@ public class AdultoMayorService {
                 .toList();
     }
 
+    // Listar todos los adultos mayores (para uso de Administradores)
+    @Transactional(readOnly = true)
+    public List<AdultoMayorResponse> listarTodos() {
+        return adultoRepository.findByActivoTrue()
+                .stream()
+                .map(AdultoMayorResponse::from)
+                .toList();
+    }
+
     // Buscar adulto por ID validando acceso del usuario (RBAC a nivel de dato)
     @Transactional(readOnly = true)
     public AdultoMayorResponse buscarPorId(Integer idAdulto, Integer idUsuario) {
