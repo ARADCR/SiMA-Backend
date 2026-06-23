@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * HU-12: Registrar o actualizar datos personales del adulto mayor.
- * Accesible por Familiar y Cuidador (con validación de acceso por dato).
+ * Controlador para gestionar la información de los adultos mayores.
+ * Implementación para HU-12: Registrar o actualizar datos personales del adulto mayor.
  */
 @RestController
 @RequestMapping("/adultos")
