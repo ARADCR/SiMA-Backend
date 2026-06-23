@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * HU-18: Registrar y asignar dispositivos IoT a un adulto mayor.
- * Solo accesible por el rol Administrador.
+ * Controlador para la gestión y asignación de dispositivos IoT (pastilleros, pulseras).
+ * Implementación para HU-18: Registrar y asignar dispositivos IoT a un adulto mayor.
  */
 @RestController
 @RequestMapping("/dispositivos")
