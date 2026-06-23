@@ -18,6 +18,10 @@ import java.util.List;
  * HU-08: Agregar o editar la agenda de medicamentos del adulto mayor.
  * Familiar y Cuidador con validación de acceso por dato.
  */
+/**
+ * Controlador para gestionar la agenda de medicamentos.
+ * Implementación para HU-08: Agregar, editar o eliminar medicamentos de la agenda.
+ */
 @RestController
 @RequestMapping("/medicamentos")
 @PreAuthorize("hasAnyRole('Administrador', 'Familiar', 'Cuidador')")
