@@ -9,6 +9,10 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Conecta el canal de notificación (app) al servicio de recordatorios.
+ * Implementación para HU-01: Recibir recordatorio de medicamento.
+ */
 @Service
 public class NotificationService {
     private static final Logger log = LoggerFactory.getLogger(NotificationService.class);
