@@ -20,7 +20,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/adultos")
-@PreAuthorize("hasAnyRole('Administrador', 'Familiar', 'Cuidador')")
+@PreAuthorize("hasAnyRole('Administrador', 'Familiar', 'Cuidador', 'Adulto Mayor')")
 public class AdultoMayorController {
 
     private final AdultoMayorService adultoService;
@@ -46,6 +46,22 @@ public class AdultoMayorController {
         return ResponseEntity.ok(
                 ApiResponse.ok("Todos los adultos obtenidos",
                         adultoService.listarTodos()));
+    }
+
+    /**
+     * GET /adultos/mi-perfil — El adulto mayor obtiene su propio idAdulto.
+     * Busca en relacion_usuario_adulto la primera relación del usuario autenticado.
+     */
+    @GetMapping("/mi-perfil")
+    @PreAuthorize("hasRole('Adulto Mayor')")
+    public ResponseEntity<ApiResponse<AdultoMayorResponse>> miPerfil(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        List<AdultoMayorResponse> mis = adultoService.listarPorUsuario(userDetails.getIdUsuario());
+        if (mis.isEmpty()) {
+            return ResponseEntity.ok(ApiResponse.ok("No tienes un perfil de adulto mayor vinculado", null));
+        }
+        return ResponseEntity.ok(ApiResponse.ok("Perfil obtenido", mis.get(0)));
     }
 
     /** GET /adultos/{id} — Obtener un adulto por ID */
