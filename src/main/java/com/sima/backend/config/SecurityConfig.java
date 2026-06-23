@@ -73,8 +73,8 @@ public class SecurityConfig {
                         .requestMatchers("/usuarios/**").hasRole("Administrador")
                         .requestMatchers("/dispositivos/**").hasRole("Administrador")
 
-                        // Familiar y Cuidador gestionan adultos y medicamentos
-                        .requestMatchers("/adultos/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
+                        // Familiar y Cuidador gestionan adultos y medicamentos. Adulto Mayor accede a su perfil.
+                        .requestMatchers("/adultos/**").hasAnyRole("Administrador", "Familiar", "Cuidador", "Adulto Mayor")
                         .requestMatchers("/medicamentos/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
 
                         // Registros de toma: todos los roles excepto Administrador
