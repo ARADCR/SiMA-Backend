@@ -39,6 +39,15 @@ public class AdultoMayorController {
                         adultoService.listarPorUsuario(userDetails.getIdUsuario())));
     }
 
+    /** GET /adultos/todos — Listar todos los adultos mayores (solo Admin) */
+    @GetMapping("/todos")
+    @PreAuthorize("hasRole('Administrador')")
+    public ResponseEntity<ApiResponse<List<AdultoMayorResponse>>> listarTodos() {
+        return ResponseEntity.ok(
+                ApiResponse.ok("Todos los adultos obtenidos",
+                        adultoService.listarTodos()));
+    }
+
     /** GET /adultos/{id} — Obtener un adulto por ID */
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<AdultoMayorResponse>> obtener(
