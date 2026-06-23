@@ -16,6 +16,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Servicio de recordatorios que envía notificación push según el horario configurado.
+ * Implementación para HU-01: Recibir recordatorio de medicamento.
+ */
 @Component
 public class RecordatorioScheduler {
 
