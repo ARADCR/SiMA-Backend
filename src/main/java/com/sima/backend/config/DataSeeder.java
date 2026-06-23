@@ -34,24 +34,17 @@ public class DataSeeder {
             seedRol(rolRepository, "Cuidador",      "Cuidador profesional");
             seedRol(rolRepository, "Adulto Mayor",  "Adulto mayor monitoreado");
 
-            // ── 2. Crear usuario admin si no existe ───────────────────────────
-            if (usuarioRepository.findByCorreo("admin@sima.com").isEmpty()) {
-                Rol rolAdmin = rolRepository.findByNombreRol("Administrador")
-                        .orElseThrow(() -> new RuntimeException("Rol Administrador no encontrado"));
+            // ── 2. Crear los 4 usuarios de prueba (misma contraseña: Admin1234) ─
+            String passwordHash = passwordEncoder.encode("Admin1234");
 
-                Usuario admin = new Usuario();
-                admin.setNombre("Admin");
-                admin.setApellido("SiMA");
-                admin.setCorreo("admin@sima.com");
-                admin.setPasswordHash(passwordEncoder.encode("Admin1234"));
-                admin.setActivo(true);
-                admin.setRol(rolAdmin);
-
-                usuarioRepository.save(admin);
-                log.info("✅ Usuario admin creado: admin@sima.com / Admin1234");
-            } else {
-                log.info("ℹ️  Usuario admin ya existe, omitiendo seed.");
-            }
+            seedUsuario(usuarioRepository, rolRepository, passwordHash,
+                    "Admin",    "SiMA",     "admin@sima.com",    "Administrador");
+            seedUsuario(usuarioRepository, rolRepository, passwordHash,
+                    "Familiar", "SiMA",     "familiar@sima.com", "Familiar");
+            seedUsuario(usuarioRepository, rolRepository, passwordHash,
+                    "Cuidador", "SiMA",     "cuidador@sima.com", "Cuidador");
+            seedUsuario(usuarioRepository, rolRepository, passwordHash,
+                    "Adulto",   "Mayor",    "adulto@sima.com",   "Adulto Mayor");
         };
     }
 
@@ -62,6 +55,28 @@ public class DataSeeder {
             rol.setDescripcion(descripcion);
             repo.save(rol);
             log.info("✅ Rol creado: {}", nombre);
+        }
+    }
+
+    private void seedUsuario(UsuarioRepository usuarioRepo,
+                              RolRepository rolRepo,
+                              String passwordHash,
+                              String nombre, String apellido,
+                              String correo, String nombreRol) {
+        if (usuarioRepo.findByCorreo(correo).isEmpty()) {
+            Rol rol = rolRepo.findByNombreRol(nombreRol)
+                    .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + nombreRol));
+            Usuario u = new Usuario();
+            u.setNombre(nombre);
+            u.setApellido(apellido);
+            u.setCorreo(correo);
+            u.setPasswordHash(passwordHash);
+            u.setActivo(true);
+            u.setRol(rol);
+            usuarioRepo.save(u);
+            log.info("✅ Usuario creado: {} [{}]", correo, nombreRol);
+        } else {
+            log.info("ℹ️  Usuario ya existe: {}", correo);
         }
     }
 }
