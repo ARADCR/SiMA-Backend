@@ -38,6 +38,7 @@ C:\SiMA\backend\SiMA-Backend\src\main\java\com\sima\backend\util\ValidationUtil.
 C:\SiMA\backend\SiMA-Backend\src\main\java\com\sima\backend\controller\RegistroTomaController.java
 C:\SiMA\backend\SiMA-Backend\src\main\java\com\sima\backend\dto\response\DispositivoIotResponse.java
 C:\SiMA\backend\SiMA-Backend\src\main\java\com\sima\backend\entity\NotificacionWechat.java
+C:\SiMA\backend\SiMA-Backend\src\main\java\com\sima\backend\config\DataSeeder.java
 C:\SiMA\backend\SiMA-Backend\src\main\java\com\sima\backend\service\AlertaServiceImpl.java
 C:\SiMA\backend\SiMA-Backend\src\main\java\com\sima\backend\dto\response\ApiResponse.java
 C:\SiMA\backend\SiMA-Backend\src\main\java\com\sima\backend\service\UsuarioService.java
@@ -50,6 +51,7 @@ C:\SiMA\backend\SiMA-Backend\src\main\java\com\sima\backend\service\Notification
 C:\SiMA\backend\SiMA-Backend\src\main\java\com\sima\backend\entity\Rol.java
 C:\SiMA\backend\SiMA-Backend\src\main\java\com\sima\backend\entity\Alerta.java
 C:\SiMA\backend\SiMA-Backend\src\main\java\com\sima\backend\security\CustomAuthenticationEntryPoint.java
+C:\SiMA\backend\SiMA-Backend\src\main\java\com\sima\backend\config\CorsConfig.java
 C:\SiMA\backend\SiMA-Backend\src\main\java\com\sima\backend\dto\request\DispositivoIotRequest.java
 C:\SiMA\backend\SiMA-Backend\src\main\java\com\sima\backend\repository\ConfiguracionSistemaRepository.java
 C:\SiMA\backend\SiMA-Backend\src\main\java\com\sima\backend\dto\request\HorarioMedicamentoRequest.java
