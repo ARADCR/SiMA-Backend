@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * HU-12: Registrar o actualizar datos personales del adulto mayor.
- * Accesible por Familiar y Cuidador (con validación de acceso por dato).
+ * Controlador para gestionar la información de los adultos mayores.
+ * Implementación para HU-12: Registrar o actualizar datos personales del adulto mayor.
  */
 @RestController
 @RequestMapping("/adultos")
-@PreAuthorize("hasAnyRole('Administrador', 'Familiar', 'Cuidador')")
+@PreAuthorize("hasAnyRole('Administrador', 'Familiar', 'Cuidador', 'Adulto Mayor')")
 public class AdultoMayorController {
 
     private final AdultoMayorService adultoService;
@@ -38,6 +38,32 @@ public class AdultoMayorController {
                 ApiResponse.ok("Adultos obtenidos",
                         adultoService.listarPorUsuario(userDetails.getIdUsuario())));
     }
+
+    /** GET /adultos/todos — Listar todos los adultos mayores (solo Admin) */
+    @GetMapping("/todos")
+    @PreAuthorize("hasRole('Administrador')")
+    public ResponseEntity<ApiResponse<List<AdultoMayorResponse>>> listarTodos() {
+        return ResponseEntity.ok(
+                ApiResponse.ok("Todos los adultos obtenidos",
+                        adultoService.listarTodos()));
+    }
+
+    /**
+     * GET /adultos/mi-perfil — El adulto mayor obtiene su propio idAdulto.
+     * Busca en relacion_usuario_adulto la primera relación del usuario autenticado.
+     */
+    @GetMapping("/mi-perfil")
+    @PreAuthorize("hasRole('Adulto Mayor')")
+    public ResponseEntity<ApiResponse<AdultoMayorResponse>> miPerfil(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        List<AdultoMayorResponse> mis = adultoService.listarPorUsuario(userDetails.getIdUsuario());
+        if (mis.isEmpty()) {
+            return ResponseEntity.ok(ApiResponse.ok("No tienes un perfil de adulto mayor vinculado", null));
+        }
+        return ResponseEntity.ok(ApiResponse.ok("Perfil obtenido", mis.get(0)));
+    }
+
 
     /** GET /adultos/{id} — Obtener un adulto por ID */
     @GetMapping("/{id}")

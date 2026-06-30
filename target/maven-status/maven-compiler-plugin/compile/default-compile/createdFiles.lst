@@ -51,7 +51,6 @@ com\sima\backend\util\MapperUtil.class
 com\sima\backend\controller\DispositivoIotController.class
 com\sima\backend\dto\request\HorarioMedicamentoRequest.class
 com\sima\backend\controller\UsuarioController.class
-com\sima\backend\SimaBackendApplication$1.class
 com\sima\backend\util\DateUtil.class
 com\sima\backend\entity\Usuario.class
 com\sima\backend\controller\AuthController.class

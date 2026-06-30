@@ -129,4 +129,34 @@ public class DispositivoIotService {
             throw new ResourceNotFoundException("Adulto mayor", "id", idAdulto);
         }
     }
+
+    // Actualizar dispositivo (HU-18)
+    @Transactional
+    public DispositivoIotResponse actualizar(Integer idDispositivo, DispositivoIotRequest request) {
+        DispositivoIot dispositivo = dispositivoRepository.findById(idDispositivo)
+                .orElseThrow(() -> new ResourceNotFoundException("Dispositivo", "id", idDispositivo));
+
+        // Verificar unicidad de identificador físico si cambió
+        if (!dispositivo.getIdentificadorFisico().equals(request.getIdentificadorFisico()) &&
+            dispositivoRepository.existsByIdentificadorFisico(request.getIdentificadorFisico())) {
+            throw new BadRequestException("Ya existe un dispositivo con el identificador: " + request.getIdentificadorFisico());
+        }
+
+        dispositivo.setIdentificadorFisico(request.getIdentificadorFisico());
+        dispositivo.setTipoDispositivo(request.getTipoDispositivo());
+
+        if (request.getIdAdulto() != null) {
+            // Si tiene adulto diferente o no tenía, reasignar
+            if (dispositivo.getAdulto() == null || !dispositivo.getAdulto().getIdAdulto().equals(request.getIdAdulto())) {
+                asignarAdultoADispositivo(dispositivo, request.getIdAdulto());
+            }
+        } else {
+            // Si el request no trae idAdulto, desasignamos si tenía uno
+            if (dispositivo.getAdulto() != null) {
+                dispositivo.setAdulto(null);
+            }
+        }
+
+        return DispositivoIotResponse.from(dispositivoRepository.save(dispositivo));
+    }
 }
