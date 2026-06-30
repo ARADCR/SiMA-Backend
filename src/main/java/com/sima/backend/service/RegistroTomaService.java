@@ -145,6 +145,7 @@ public class RegistroTomaService {
             return; // tiene acceso
         }
         // 2. Check if this user IS the adulto mayor (self-access)
+        //    Buscar todos los adultos vinculados al usuario y ver si el idAdulto es uno de ellos
         List<Integer> idsAdultos = relacionRepository.findByUsuario_IdUsuario(idUsuario)
                 .stream()
                 .map(r -> r.getAdulto().getIdAdulto())
