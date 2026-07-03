@@ -84,7 +84,8 @@ public class SecurityConfig {
                         .requestMatchers("/alertas/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
 
                         // Notificaciones SSE
-                        .requestMatchers("/notifications/**").hasAnyRole("Administrador", "Familiar", "Cuidador", "Adulto Mayor")
+                        .requestMatchers("/notifications/**")
+                        .hasAnyRole("Administrador", "Familiar", "Cuidador", "Adulto Mayor")
 
                         // Cualquier otra ruta requiere autenticación
                         .anyRequest().authenticated())
@@ -100,7 +101,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:4200")); // URL de Angular
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
