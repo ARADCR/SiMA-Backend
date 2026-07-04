@@ -2,8 +2,10 @@ package com.sima.backend.service;
 
 import com.sima.backend.entity.Alerta;
 import com.sima.backend.entity.HorarioMedicamento;
+import com.sima.backend.entity.RelacionUsuarioAdulto;
 import com.sima.backend.repository.AlertaRepository;
 import com.sima.backend.repository.HorarioMedicamentoRepository;
+import com.sima.backend.repository.RelacionUsuarioAdultoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,13 +26,16 @@ public class RecordatorioScheduler {
     private final HorarioMedicamentoRepository horarioRepository;
     private final NotificationService notificationService;
     private final AlertaRepository alertaRepository;
+    private final RelacionUsuarioAdultoRepository relacionRepository;
 
     public RecordatorioScheduler(HorarioMedicamentoRepository horarioRepository,
                                  NotificationService notificationService,
-                                 AlertaRepository alertaRepository) {
+                                 AlertaRepository alertaRepository,
+                                 RelacionUsuarioAdultoRepository relacionRepository) {
         this.horarioRepository = horarioRepository;
         this.notificationService = notificationService;
         this.alertaRepository = alertaRepository;
+        this.relacionRepository = relacionRepository;
     }
 
     // Se ejecuta cada minuto en el segundo 0
@@ -52,31 +57,43 @@ public class RecordatorioScheduler {
     }
 
     private void enviarRecordatorio(HorarioMedicamento horario) {
+        Integer idAdulto = horario.getMedicamento().getAdulto().getIdAdulto();
+
         // 1. Crear registro de Alerta en DB
         Alerta alerta = new Alerta();
         alerta.setTipoAlerta("RECORDATORIO_MEDICAMENTO");
-        alerta.setMensaje("Hora de tomar: " + horario.getMedicamento().getNombre() + " - Dosis: " + horario.getMedicamento().getDosis());
+        alerta.setMensaje("Hora de tomar: " + horario.getMedicamento().getNombre()
+                + " - Dosis: " + horario.getMedicamento().getDosis());
         alerta.setAdulto(horario.getMedicamento().getAdulto());
-        // alerta.setMedicamento(horario.getMedicamento()); // si existe la relación en Alerta
-        
         alertaRepository.save(alerta);
 
-        // 2. Enviar notificación push (SSE) al adulto mayor
+        // 2. Construir payload de la notificación
         Map<String, Object> payload = new HashMap<>();
         payload.put("idMedicamento", horario.getMedicamento().getIdMedicamento());
         payload.put("nombre", horario.getMedicamento().getNombre());
         payload.put("dosis", horario.getMedicamento().getDosis());
         payload.put("hora", horario.getHoraProgramada().toString());
         payload.put("idAlerta", alerta.getIdAlerta());
+        payload.put("idAdulto", idAdulto);
 
-        notificationService.sendNotification(
-                horario.getMedicamento().getAdulto().getIdAdulto(),
-                "RECORDATORIO_MEDICAMENTO",
-                payload
-        );
-        
-        log.info("Recordatorio enviado al adulto {} para el medicamento {}",
-                horario.getMedicamento().getAdulto().getIdAdulto(),
-                horario.getMedicamento().getNombre());
+        // 3. Enviar notificación SSE a todos los Familiares y Cuidadores vinculados al adulto.
+        //    El adulto mayor ya no es un usuario del sistema, por lo que la notificación
+        //    se dirige a quienes gestionan su atención.
+        List<RelacionUsuarioAdulto> relaciones = relacionRepository
+                .findByAdulto_IdAdultoAndTipoRelacion(idAdulto, "familiar");
+        relaciones.addAll(relacionRepository
+                .findByAdulto_IdAdultoAndTipoRelacion(idAdulto, "cuidador_asignado"));
+
+        if (relaciones.isEmpty()) {
+            log.warn("No hay Familiares ni Cuidadores vinculados al adulto {} para enviar el recordatorio.", idAdulto);
+            return;
+        }
+
+        for (RelacionUsuarioAdulto relacion : relaciones) {
+            Integer idUsuario = relacion.getUsuario().getIdUsuario();
+            notificationService.sendNotification(idUsuario, "RECORDATORIO_MEDICAMENTO", payload);
+            log.info("Recordatorio enviado al usuario {} (adulto {}) para el medicamento {}",
+                    idUsuario, idAdulto, horario.getMedicamento().getNombre());
+        }
     }
 }
