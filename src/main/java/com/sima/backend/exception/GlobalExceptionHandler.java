@@ -84,8 +84,9 @@ public class GlobalExceptionHandler {
     // 500 - Error interno no controlado
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneral(Exception ex) {
+        ex.printStackTrace();
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("Error interno del servidor. Contacta al administrador."));
+                .body(ApiResponse.error("Error interno: " + ex.getMessage()));
     }
 }

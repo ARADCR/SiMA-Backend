@@ -76,7 +76,10 @@ public class DataSeeder {
             usuarioRepo.save(u);
             log.info("✅ Usuario creado: {} [{}]", correo, nombreRol);
         } else {
-            log.info("ℹ️  Usuario ya existe: {}", correo);
+            Usuario u = usuarioRepo.findByCorreo(correo).get();
+            u.setPasswordHash(passwordHash);
+            usuarioRepo.save(u);
+            log.info("ℹ️  Usuario ya existe. Contraseña actualizada: {}", correo);
         }
     }
 }
