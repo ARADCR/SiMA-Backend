@@ -37,19 +37,8 @@ public class AdultoMayorService {
     // Listar adultos asignados al usuario autenticado
     @Transactional(readOnly = true)
     public List<AdultoMayorResponse> listarPorUsuario(Integer idUsuario) {
-        List<AdultoMayor> adultos = adultoRepository.findByUsuarioId(idUsuario);
-
-        // DEMO FALLBACK: Si es el usuario de demostración 'Adulto Mayor' (idUsuario=4)
-        // y no tiene relaciones formales, le retornamos el primer adulto mayor creado
-        // para que pueda ver sus propios recordatorios en la demostración.
-        if (adultos.isEmpty() && idUsuario != null && idUsuario == 4) {
-            List<AdultoMayor> todos = adultoRepository.findByActivoTrue();
-            if (!todos.isEmpty()) {
-                adultos = List.of(todos.get(0));
-            }
-        }
-
-        return adultos.stream()
+        return adultoRepository.findByUsuarioId(idUsuario)
+                .stream()
                 .map(AdultoMayorResponse::from)
                 .toList();
     }
