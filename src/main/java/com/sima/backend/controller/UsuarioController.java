@@ -17,6 +17,10 @@ import java.util.List;
  * HU-17: Crear, editar y desactivar cuentas de familiares/cuidadores.
  * Solo accesible por el rol Administrador.
  */
+/**
+ * Controlador para la gestión de usuarios del sistema.
+ * Implementación para HU-17: Crear, editar o eliminar cuentas de familiares/cuidadores.
+ */
 @RestController
 @RequestMapping("/usuarios")
 @PreAuthorize("hasRole('Administrador')")

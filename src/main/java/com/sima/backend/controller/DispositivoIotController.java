@@ -83,4 +83,15 @@ public class DispositivoIotController {
                 ApiResponse.ok("Dispositivo desasignado exitosamente",
                         dispositivoService.desasignar(id)));
     }
+
+    /** PUT /dispositivos/{id} — Actualizar datos del dispositivo */
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<DispositivoIotResponse>> actualizar(
+            @PathVariable Integer id,
+            @Valid @RequestBody DispositivoIotRequest request) {
+
+        return ResponseEntity.ok(
+                ApiResponse.ok("Dispositivo actualizado exitosamente",
+                        dispositivoService.actualizar(id, request)));
+    }
 }

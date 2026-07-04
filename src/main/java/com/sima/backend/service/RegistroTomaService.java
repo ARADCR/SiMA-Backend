@@ -7,6 +7,7 @@ import com.sima.backend.exception.BadRequestException;
 import com.sima.backend.exception.ResourceNotFoundException;
 import com.sima.backend.exception.UnauthorizedException;
 import com.sima.backend.repository.AlertaRepository;
+import com.sima.backend.repository.HorarioMedicamentoRepository;
 import com.sima.backend.repository.RegistroTomaRepository;
 import com.sima.backend.repository.RelacionUsuarioAdultoRepository;
 import org.springframework.stereotype.Service;
@@ -17,8 +18,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * HU-01: Recibir recordatorio de medicamento.
- * HU-02: Confirmar toma desde la app o chatbot.
+ * HU-01: Recibir recordatorio de medicamento (receptor: Familiar/Cuidador).
+ * HU-02: Confirmar toma — responsabilidad del Familiar o Cuidador.
  * HU-13: Registrar manualmente toma (cuidador).
  */
 @Service
@@ -28,26 +29,45 @@ public class RegistroTomaService {
     private final RelacionUsuarioAdultoRepository relacionRepository;
     private final AlertaRepository alertaRepository;
 
+    private final HorarioMedicamentoRepository horarioRepository;
+
     public RegistroTomaService(RegistroTomaRepository registroRepository,
             RelacionUsuarioAdultoRepository relacionRepository,
-            AlertaRepository alertaRepository) {
+            AlertaRepository alertaRepository,
+            HorarioMedicamentoRepository horarioRepository) {
         this.registroRepository = registroRepository;
         this.relacionRepository = relacionRepository;
         this.alertaRepository = alertaRepository;
+        this.horarioRepository = horarioRepository;
     }
 
     // Obtener tomas del día para un adulto (HU-01 - base del recordatorio)
-    @Transactional(readOnly = true)
+    @Transactional
     public List<RegistroTomaResponse> listarTomasDelDia(Integer idAdulto, Integer idUsuario) {
         validarAcceso(idUsuario, idAdulto);
 
         LocalDateTime inicioDia = LocalDate.now().atStartOfDay();
         LocalDateTime finDia = inicioDia.plusDays(1);
 
-        return registroRepository.findTomasDelDia(idAdulto, inicioDia, finDia)
-                .stream()
-                .map(RegistroTomaResponse::from)
-                .toList();
+        List<RegistroToma> tomasHoy = registroRepository.findTomasDelDia(idAdulto, inicioDia, finDia);
+
+        // DEMO AUTOGENERATOR: Si no hay tomas para hoy, las generamos al vuelo.
+        if (tomasHoy.isEmpty()) {
+            List<com.sima.backend.entity.HorarioMedicamento> horarios = horarioRepository.findHorariosActivosByAdulto(idAdulto);
+            for (com.sima.backend.entity.HorarioMedicamento h : horarios) {
+                RegistroToma nuevaToma = new RegistroToma();
+                nuevaToma.setHorario(h);
+                nuevaToma.setAdulto(h.getMedicamento().getAdulto());
+                nuevaToma.setEstado("pendiente");
+                nuevaToma.setFechaHoraProgramada(LocalDateTime.of(LocalDate.now(), h.getHoraProgramada()));
+                registroRepository.save(nuevaToma);
+            }
+            if (!horarios.isEmpty()) {
+                tomasHoy = registroRepository.findTomasDelDia(idAdulto, inicioDia, finDia);
+            }
+        }
+
+        return tomasHoy.stream().map(RegistroTomaResponse::from).toList();
     }
 
     // Obtener próxima toma pendiente de un adulto (HU-04 - chatbot)
@@ -116,6 +136,8 @@ public class RegistroTomaService {
 
     // ---------------------------------------------------------------
     // Validación RBAC a nivel de datos
+    // Solo permite acceso si el usuario (Familiar o Cuidador) tiene
+    // una relación directa con el adulto en relacion_usuario_adulto.
     // ---------------------------------------------------------------
     private void validarAcceso(Integer idUsuario, Integer idAdulto) {
         if (relacionRepository.validarAccesoUsuarioAdulto(idUsuario, idAdulto)) {

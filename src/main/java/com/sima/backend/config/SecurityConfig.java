@@ -77,14 +77,14 @@ public class SecurityConfig {
                         .requestMatchers("/adultos/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
                         .requestMatchers("/medicamentos/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
 
-                        // Registros de toma: todos los roles excepto Administrador
-                        .requestMatchers("/tomas/**").hasAnyRole("Familiar", "Cuidador", "Adulto Mayor")
+                        // Registros de toma: Familiar y Cuidador
+                        .requestMatchers("/tomas/**").hasAnyRole("Familiar", "Cuidador")
 
                         // Alertas: Familiar y Cuidador
                         .requestMatchers("/alertas/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
 
                         // Notificaciones SSE
-                        .requestMatchers("/notifications/**").hasAnyRole("Administrador", "Familiar", "Cuidador", "Adulto Mayor")
+                        .requestMatchers("/notifications/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
 
                         // Cualquier otra ruta requiere autenticación
                         .anyRequest().authenticated())
