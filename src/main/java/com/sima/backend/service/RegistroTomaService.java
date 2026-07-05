@@ -18,8 +18,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * HU-01: Recibir recordatorio de medicamento.
- * HU-02: Confirmar toma desde la app o chatbot.
+ * HU-01: Recibir recordatorio de medicamento (receptor: Familiar/Cuidador).
+ * HU-02: Confirmar toma — responsabilidad del Familiar o Cuidador.
  * HU-13: Registrar manualmente toma (cuidador).
  */
 @Service
@@ -136,8 +136,8 @@ public class RegistroTomaService {
 
     // ---------------------------------------------------------------
     // Validación RBAC a nivel de datos
-    // Permite acceso si el usuario tiene una relación directa con el adulto,
-    // O si el propio adulto mayor está accediendo a sus datos.
+    // Solo permite acceso si el usuario (Familiar o Cuidador) tiene
+    // una relación directa con el adulto en relacion_usuario_adulto.
     // ---------------------------------------------------------------
     private void validarAcceso(Integer idUsuario, Integer idAdulto) {
         // 1. Check via relacion_usuario_adulto (Familiar / Cuidador)

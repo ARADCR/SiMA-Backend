@@ -22,7 +22,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/tomas")
-@PreAuthorize("hasAnyRole('Familiar', 'Cuidador', 'Adulto Mayor')")
+@PreAuthorize("hasAnyRole('Familiar', 'Cuidador')")
 public class RegistroTomaController {
 
     private final RegistroTomaService registroTomaService;

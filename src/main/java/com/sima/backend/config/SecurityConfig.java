@@ -73,18 +73,18 @@ public class SecurityConfig {
                         .requestMatchers("/usuarios/**").hasRole("Administrador")
                         .requestMatchers("/dispositivos/**").hasRole("Administrador")
 
-                        // Familiar y Cuidador gestionan adultos y medicamentos. Adulto Mayor accede a su perfil.
-                        .requestMatchers("/adultos/**").hasAnyRole("Administrador", "Familiar", "Cuidador", "Adulto Mayor")
+                        // Familiar y Cuidador gestionan adultos y medicamentos
+                        .requestMatchers("/adultos/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
                         .requestMatchers("/medicamentos/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
 
-                        // Registros de toma: todos los roles excepto Administrador
-                        .requestMatchers("/tomas/**").hasAnyRole("Familiar", "Cuidador", "Adulto Mayor")
+                        // Registros de toma: Familiar y Cuidador
+                        .requestMatchers("/tomas/**").hasAnyRole("Familiar", "Cuidador")
 
                         // Alertas: Familiar y Cuidador
                         .requestMatchers("/alertas/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
 
                         // Notificaciones SSE
-                        .requestMatchers("/notifications/**").hasAnyRole("Administrador", "Familiar", "Cuidador", "Adulto Mayor")
+                        .requestMatchers("/notifications/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
 
                         // Cualquier otra ruta requiere autenticación
                         .anyRequest().authenticated())
@@ -96,11 +96,18 @@ public class SecurityConfig {
         return http.build();
     }
 
+    @org.springframework.beans.factory.annotation.Value("${CORS_ALLOWED_ORIGINS:http://localhost:4200}")
+    private String allowedOrigins;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200")); // URL de Angular
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        
+        // Mapear los orígenes dinámicos split por comas
+        java.util.List<String> origins = java.util.Arrays.asList(allowedOrigins.split(","));
+        configuration.setAllowedOrigins(origins);
+        
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
