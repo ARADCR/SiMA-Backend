@@ -77,8 +77,8 @@ public class SecurityConfig {
                         .requestMatchers("/adultos/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
                         .requestMatchers("/medicamentos/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
 
-                        // Registros de toma: todos los roles excepto Administrador
-                        .requestMatchers("/tomas/**").hasAnyRole("Familiar", "Cuidador", "Adulto Mayor")
+                        // Registros de toma: Familiar y Cuidador
+                        .requestMatchers("/tomas/**").hasAnyRole("Familiar", "Cuidador")
 
                         // Alertas: Familiar y Cuidador
                         .requestMatchers("/alertas/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
@@ -97,11 +97,17 @@ public class SecurityConfig {
         return http.build();
     }
 
+    @org.springframework.beans.factory.annotation.Value("${CORS_ALLOWED_ORIGINS:http://localhost:4200}")
+    private String allowedOrigins;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200")); // URL de Angular
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        // Mapear los orígenes dinámicos split por comas
+        java.util.List<String> origins = java.util.Arrays.asList(allowedOrigins.split(","));
+        configuration.setAllowedOrigins(origins);
+        
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 

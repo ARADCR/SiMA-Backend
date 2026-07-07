@@ -1,4 +1,5 @@
 com\sima\backend\service\AdultoMayorService.class
+com\sima\backend\service\RecordatorioScheduler.class
 com\sima\backend\dto\response\AdultoMayorResponse.class
 com\sima\backend\exception\GlobalExceptionHandler.class
 com\sima\backend\exception\BadRequestException.class
@@ -20,6 +21,7 @@ com\sima\backend\repository\UsuarioRepository.class
 com\sima\backend\dto\response\LoginResponse.class
 com\sima\backend\entity\NotificacionWechat.class
 com\sima\backend\controller\AlertaController.class
+com\sima\backend\controller\NotificationController.class
 com\sima\backend\controller\AdultoMayorController.class
 com\sima\backend\repository\AdultoMayorRepository.class
 com\sima\backend\dto\request\MedicamentoRequest.class
@@ -45,14 +47,15 @@ com\sima\backend\service\AuthService.class
 com\sima\backend\dto\request\RegistroTomaRequest.class
 com\sima\backend\entity\AuditoriaLog.class
 com\sima\backend\dto\request\UsuarioCreateRequest.class
+com\sima\backend\config\CorsConfig.class
 com\sima\backend\controller\MedicamentoController.class
 com\sima\backend\service\AlertaServiceImpl.class
 com\sima\backend\util\MapperUtil.class
 com\sima\backend\controller\DispositivoIotController.class
 com\sima\backend\dto\request\HorarioMedicamentoRequest.class
 com\sima\backend\controller\UsuarioController.class
-com\sima\backend\SimaBackendApplication$1.class
 com\sima\backend\util\DateUtil.class
+com\sima\backend\config\DataSeeder.class
 com\sima\backend\entity\Usuario.class
 com\sima\backend\controller\AuthController.class
 com\sima\backend\dto\response\MedicamentoResponse$HorarioResponse.class
@@ -64,6 +67,7 @@ com\sima\backend\dto\request\AdultoMayorRequest.class
 com\sima\backend\repository\RegistroTomaRepository.class
 com\sima\backend\config\SecurityConfig.class
 com\sima\backend\repository\RolRepository.class
+com\sima\backend\service\NotificationService.class
 com\sima\backend\dto\response\UsuarioResponse.class
 com\sima\backend\entity\ObservacionCuidador.class
 com\sima\backend\repository\AlertaRepository.class

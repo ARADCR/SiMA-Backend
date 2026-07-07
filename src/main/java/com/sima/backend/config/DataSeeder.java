@@ -15,7 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * DataSeeder: inserta datos iniciales en la base de datos al arrancar la app.
- * Crea los 4 roles del sistema y un usuario Administrador por defecto.
+ * Crea los roles del sistema y los usuarios de prueba por defecto.
+ * El rol 'Adulto Mayor' se mantiene en la tabla roles por consistencia del modelo,
+ * pero no se crea ningún usuario con ese rol: el adulto mayor no es un usuario del sistema.
  */
 @Configuration
 public class DataSeeder {
@@ -34,7 +36,7 @@ public class DataSeeder {
             seedRol(rolRepository, "Cuidador",      "Cuidador profesional");
             seedRol(rolRepository, "Adulto Mayor",  "Adulto mayor monitoreado");
 
-            // ── 2. Crear los 4 usuarios de prueba (misma contraseña: Admin1234) ─
+            // ── 2. Crear los 3 usuarios de prueba (misma contraseña: Admin1234) ──────────────────
             String passwordHash = passwordEncoder.encode("Admin1234");
 
             seedUsuario(usuarioRepository, rolRepository, passwordHash,
@@ -43,8 +45,6 @@ public class DataSeeder {
                     "Familiar", "SiMA",     "familiar@sima.com", "Familiar");
             seedUsuario(usuarioRepository, rolRepository, passwordHash,
                     "Cuidador", "SiMA",     "cuidador@sima.com", "Cuidador");
-            seedUsuario(usuarioRepository, rolRepository, passwordHash,
-                    "Adulto",   "Mayor",    "adulto@sima.com",   "Adulto Mayor");
         };
     }
 
@@ -76,7 +76,10 @@ public class DataSeeder {
             usuarioRepo.save(u);
             log.info("✅ Usuario creado: {} [{}]", correo, nombreRol);
         } else {
-            log.info("ℹ️  Usuario ya existe: {}", correo);
+            Usuario u = usuarioRepo.findByCorreo(correo).get();
+            u.setPasswordHash(passwordHash);
+            usuarioRepo.save(u);
+            log.info("ℹ️  Usuario ya existe. Contraseña actualizada: {}", correo);
         }
     }
 }
