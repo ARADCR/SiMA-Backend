@@ -66,6 +66,11 @@ public class MedicamentoService {
         medicamento.setDosis(request.getDosis());
         medicamento.setFrecuenciaHoras(request.getFrecuenciaHoras());
         medicamento.setObservaciones(request.getObservaciones());
+        medicamento.setPrincipioActivo(request.getPrincipioActivo());
+        medicamento.setFechaFin(request.getFechaFin());
+        medicamento.setStockActual(request.getStockActual());
+        medicamento.setStockMinimo(request.getStockMinimo());
+        medicamento.setPrescritoPor(request.getPrescritoPor());
         medicamento.setActivo(true);
 
         medicamento = medicamentoRepository.save(medicamento);
@@ -108,6 +113,11 @@ public class MedicamentoService {
         medicamento.setDosis(request.getDosis());
         medicamento.setFrecuenciaHoras(request.getFrecuenciaHoras());
         medicamento.setObservaciones(request.getObservaciones());
+        medicamento.setPrincipioActivo(request.getPrincipioActivo());
+        medicamento.setFechaFin(request.getFechaFin());
+        medicamento.setStockActual(request.getStockActual());
+        medicamento.setStockMinimo(request.getStockMinimo());
+        medicamento.setPrescritoPor(request.getPrescritoPor());
 
         return MedicamentoResponse.from(medicamentoRepository.save(medicamento));
     }

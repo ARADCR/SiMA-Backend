@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -41,6 +42,21 @@ public class Medicamento {
 
     @Column(name = "observaciones", columnDefinition = "TEXT")
     private String observaciones;
+
+    @Column(name = "principio_activo", length = 150)
+    private String principioActivo;
+
+    @Column(name = "fecha_fin")
+    private LocalDate fechaFin;
+
+    @Column(name = "stock_actual")
+    private Integer stockActual;
+
+    @Column(name = "stock_minimo")
+    private Integer stockMinimo;
+
+    @Column(name = "prescrito_por", length = 150)
+    private String prescritoPor;
 
     @CreationTimestamp
     @Column(name = "creado_en", nullable = false, updatable = false)

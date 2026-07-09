@@ -140,11 +140,12 @@ public class RegistroTomaService {
     // una relación directa con el adulto en relacion_usuario_adulto.
     // ---------------------------------------------------------------
     private void validarAcceso(Integer idUsuario, Integer idAdulto) {
+        // 1. Check via relacion_usuario_adulto (Familiar / Cuidador)
         if (relacionRepository.validarAccesoUsuarioAdulto(idUsuario, idAdulto)) {
-            return;
+            return; // tiene acceso
         }
-
         // 2. Check if this user IS the adulto mayor (self-access)
+        //    Buscar todos los adultos vinculados al usuario y ver si el idAdulto es uno de ellos
         List<Integer> idsAdultos = relacionRepository.findByUsuario_IdUsuario(idUsuario)
                 .stream()
                 .map(r -> r.getAdulto().getIdAdulto())
