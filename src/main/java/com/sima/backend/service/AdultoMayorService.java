@@ -43,10 +43,10 @@ public class AdultoMayorService {
                 .toList();
     }
 
-    // Listar todos los adultos mayores (para uso de Administradores)
+    // Listar todos los adultos mayores con info de familiar (para uso de Administradores)
     @Transactional(readOnly = true)
     public List<AdultoMayorResponse> listarTodos() {
-        return adultoRepository.findByActivoTrue()
+        return adultoRepository.findAllWithRelaciones()
                 .stream()
                 .map(AdultoMayorResponse::from)
                 .toList();
@@ -114,6 +114,26 @@ public class AdultoMayorService {
         adulto.setContactoMedico(request.getContactoMedico());
 
         return AdultoMayorResponse.from(adultoRepository.save(adulto));
+    }
+
+    // Eliminar (soft delete) adulto mayor — solo Admin
+    @Transactional
+    public void eliminar(Integer idAdulto) {
+        AdultoMayor adulto = adultoRepository.findById(idAdulto)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Adulto mayor", "id", idAdulto));
+        adulto.setActivo(false);
+        adultoRepository.save(adulto);
+    }
+
+    // Reactivar adulto mayor — solo Admin
+    @Transactional
+    public void reactivar(Integer idAdulto) {
+        AdultoMayor adulto = adultoRepository.findById(idAdulto)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Adulto mayor", "id", idAdulto));
+        adulto.setActivo(true);
+        adultoRepository.save(adulto);
     }
 
     // ---------------------------------------------------------------
