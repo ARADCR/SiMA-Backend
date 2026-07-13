@@ -10,6 +10,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 
 
@@ -27,7 +28,8 @@ public class DataSeeder {
     @Bean
     public CommandLineRunner seedDatabase(RolRepository rolRepository,
                                           UsuarioRepository usuarioRepository,
-                                          PasswordEncoder passwordEncoder) {
+                                          PasswordEncoder passwordEncoder,
+                                          JdbcTemplate jdbcTemplate) {
         return args -> {
 
             // ── 1. Crear roles si no existen ──────────────────────────────────
@@ -45,6 +47,37 @@ public class DataSeeder {
                     "Familiar", "SiMA",     "familiar@sima.com", "Familiar");
             seedUsuario(usuarioRepository, rolRepository, passwordHash,
                     "Cuidador", "SiMA",     "cuidador@sima.com", "Cuidador");
+
+            // ── 3. Insertar datos de prueba para Adulto, Relaciones, y Medicamentos ────────
+            try {
+                // Adultos (Solo inserta si no existen. ID 1 y 2 para emparejar con frontend)
+                jdbcTemplate.execute("INSERT IGNORE INTO adultos_mayores (id_adulto, nombre, apellido, activo, creado_en) VALUES (1, 'Elena', 'Rodríguez', 1, NOW())");
+                jdbcTemplate.execute("INSERT IGNORE INTO adultos_mayores (id_adulto, nombre, apellido, activo, creado_en) VALUES (2, 'José', 'Rodríguez', 1, NOW())");
+
+                Integer idFamiliar = usuarioRepository.findByCorreo("familiar@sima.com").map(Usuario::getIdUsuario).orElse(0);
+                Integer idCuidador = usuarioRepository.findByCorreo("cuidador@sima.com").map(Usuario::getIdUsuario).orElse(0);
+
+                if (idFamiliar > 0) {
+                    jdbcTemplate.execute("INSERT IGNORE INTO relacion_usuario_adulto (id_usuario, id_adulto, tipo_relacion, es_contacto_emergencia) VALUES (" + idFamiliar + ", 1, 'familiar', 1)");
+                    jdbcTemplate.execute("INSERT IGNORE INTO relacion_usuario_adulto (id_usuario, id_adulto, tipo_relacion, es_contacto_emergencia) VALUES (" + idFamiliar + ", 2, 'familiar', 1)");
+                }
+                if (idCuidador > 0) {
+                    jdbcTemplate.execute("INSERT IGNORE INTO relacion_usuario_adulto (id_usuario, id_adulto, tipo_relacion, es_contacto_emergencia) VALUES (" + idCuidador + ", 1, 'cuidador_asignado', 0)");
+                    jdbcTemplate.execute("INSERT IGNORE INTO relacion_usuario_adulto (id_usuario, id_adulto, tipo_relacion, es_contacto_emergencia) VALUES (" + idCuidador + ", 2, 'cuidador_asignado', 0)");
+                }
+
+                // Medicamentos
+                jdbcTemplate.execute("INSERT IGNORE INTO medicamentos (id_medicamento, id_adulto, nombre, dosis, frecuencia_horas, creado_en) VALUES (1, 1, 'Omeprazol', '20mg', 24, NOW())");
+                jdbcTemplate.execute("INSERT IGNORE INTO medicamentos (id_medicamento, id_adulto, nombre, dosis, frecuencia_horas, creado_en) VALUES (2, 2, 'Losartán', '50mg', 12, NOW())");
+
+                // Horarios
+                jdbcTemplate.execute("INSERT IGNORE INTO horarios_medicamento (id_horario, id_medicamento, hora_programada, activo) VALUES (1, 1, '08:00:00', 1)");
+                jdbcTemplate.execute("INSERT IGNORE INTO horarios_medicamento (id_horario, id_medicamento, hora_programada, activo) VALUES (2, 2, '09:00:00', 1)");
+
+                log.info("✅ Datos de prueba (Adultos, Relaciones, Medicamentos) inyectados.");
+            } catch (Exception e) {
+                log.error("Error al inyectar datos de prueba: {}", e.getMessage());
+            }
         };
     }
 
