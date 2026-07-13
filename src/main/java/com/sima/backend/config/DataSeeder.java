@@ -78,8 +78,9 @@ public class DataSeeder {
         } else {
             Usuario u = usuarioRepo.findByCorreo(correo).get();
             u.setPasswordHash(passwordHash);
+            u.setActivo(true);
             usuarioRepo.save(u);
-            log.info("ℹ️  Usuario ya existe. Contraseña actualizada: {}", correo);
+            log.info("ℹ️  Usuario ya existe. Contraseña actualizada y cuenta activada: {}", correo);
         }
     }
 }
