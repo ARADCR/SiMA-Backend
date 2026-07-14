@@ -39,4 +39,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     @Modifying
     @Query("UPDATE Usuario u SET u.activo = false WHERE u.idUsuario = :id")
     void desactivarUsuario(@Param("id") Integer idUsuario);
+
+    // Activar usuario
+    @Modifying
+    @Query("UPDATE Usuario u SET u.activo = true WHERE u.idUsuario = :id")
+    void activarUsuario(@Param("id") Integer idUsuario);
 }
