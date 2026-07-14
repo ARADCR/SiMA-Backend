@@ -31,6 +31,18 @@ public class ObservacionCuidador {
     @Column(name = "texto", nullable = false, columnDefinition = "TEXT")
     private String texto;
 
+    @Column(name = "urgencia", nullable = false, length = 20)
+    private String urgencia;
+
+    @Column(name = "tension_arterial", length = 20)
+    private String tensionArterial;
+
+    @Column(name = "frecuencia_cardiaca", length = 20)
+    private String frecuenciaCardiaca;
+
+    @Column(name = "temperatura", length = 20)
+    private String temperatura;
+
     @CreationTimestamp
     @Column(name = "fecha_hora", nullable = false, updatable = false)
     private LocalDateTime fechaHora;

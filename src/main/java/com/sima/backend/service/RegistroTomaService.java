@@ -153,11 +153,6 @@ public class RegistroTomaService {
         if (idsAdultos.contains(idAdulto)) {
             return;
         }
-        
-        // DEMO FALLBACK: Si es el usuario de demostración 'Adulto Mayor' (idUsuario=4), le damos acceso a sus datos (idAdulto=1 o el que sea)
-        if (idUsuario != null && idUsuario == 4) {
-            return;
-        }
 
         throw new UnauthorizedException(
                 "No tienes acceso a los registros del adulto con id: " + idAdulto);
