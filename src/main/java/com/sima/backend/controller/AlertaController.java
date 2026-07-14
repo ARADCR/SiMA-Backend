@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
+import com.sima.backend.dto.response.ApiResponse;
+
 @RestController
-@RequestMapping("/api/alertas")
+@RequestMapping("/alertas")
 public class AlertaController {
 
     @Autowired
@@ -20,17 +22,24 @@ public class AlertaController {
 
     // GET /api/alertas/activas -> list of active alerts
     @GetMapping("/activas")
-    public List<AlertaResponse> getAlertasActivas() {
-        return alertaService.getAlertasActivas();
+    public ApiResponse<List<AlertaResponse>> getAlertasActivas() {
+        return ApiResponse.ok("Alertas activas", alertaService.getAlertasActivas());
     }
 
     // GET /api/alertas/contador -> total number of active alerts
     @GetMapping("/contador")
-    public Map<String, Long> getContadorAlertas() {
+    public ApiResponse<Map<String, Long>> getContadorAlertas() {
         // Simple approach: fetch list and count size
         long total = alertaService.getAlertasActivas().size();
         Map<String, Long> resp = new HashMap<>();
         resp.put("total", total);
-        return resp;
+        return ApiResponse.ok("Contador de alertas", resp);
+    }
+
+    // PATCH /alertas/{id}/resolver -> resolve an alert
+    @org.springframework.web.bind.annotation.PatchMapping("/{id}/resolver")
+    public ApiResponse<AlertaResponse> resolverAlerta(@org.springframework.web.bind.annotation.PathVariable("id") Integer id) {
+        alertaService.resolverAlerta(id);
+        return ApiResponse.ok("Alerta resuelta exitosamente");
     }
 }

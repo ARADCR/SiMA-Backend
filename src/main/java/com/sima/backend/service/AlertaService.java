@@ -9,4 +9,7 @@ public interface AlertaService {
 
     // Count active alerts for a specific adult
     long contarAlertasActivas(Integer idAdulto);
+
+    // Resolve an alert
+    void resolverAlerta(Integer idAlerta);
 }

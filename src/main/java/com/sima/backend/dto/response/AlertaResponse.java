@@ -16,13 +16,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class AlertaResponse {
 
-    private Integer idAlerta;
-    private Integer idAdulto;
+    private Integer id;
+    private Integer adultoMayorId;
     private String nombreAdulto;
-    private String tipoAlerta; // omision_medicacion | caida_detectada | emergencia | bateria_baja
-    private String mensaje;
-    private Boolean resuelta;
-    private LocalDateTime creadoEn;
+    private String tipo; // omision_medicacion | caida_detectada | emergencia | bateria_baja
+    private String descripcion;
+    private String estado;
+    private String prioridad;
+    private LocalDateTime timestamp;
 
     // Origen de la alerta (solo uno de los dos vendrá con valor)
     private Integer idRegistro; // Si viene de toma omitida
@@ -30,13 +31,21 @@ public class AlertaResponse {
 
     public static AlertaResponse from(Alerta a) {
         AlertaResponse dto = new AlertaResponse();
-        dto.setIdAlerta(a.getIdAlerta());
-        dto.setIdAdulto(a.getAdulto().getIdAdulto());
+        dto.setId(a.getIdAlerta());
+        dto.setAdultoMayorId(a.getAdulto().getIdAdulto());
         dto.setNombreAdulto(a.getAdulto().getNombre() + " " + a.getAdulto().getApellido());
-        dto.setTipoAlerta(a.getTipoAlerta());
-        dto.setMensaje(a.getMensaje());
-        dto.setResuelta(a.getResuelta());
-        dto.setCreadoEn(a.getCreadoEn());
+        dto.setTipo(a.getTipoAlerta());
+        dto.setDescripcion(a.getMensaje());
+        dto.setEstado(a.getResuelta() ? "resuelta" : "pendiente");
+        
+        // Asignar prioridad basada en el tipo de alerta
+        if ("emergencia".equals(a.getTipoAlerta()) || "caida_detectada".equals(a.getTipoAlerta())) {
+            dto.setPrioridad("critica");
+        } else {
+            dto.setPrioridad("moderada");
+        }
+
+        dto.setTimestamp(a.getCreadoEn());
 
         if (a.getRegistro() != null) {
             dto.setIdRegistro(a.getRegistro().getIdRegistro());

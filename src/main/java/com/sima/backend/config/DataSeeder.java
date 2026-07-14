@@ -69,12 +69,35 @@ public class DataSeeder {
                 // Medicamentos
                 jdbcTemplate.execute("INSERT IGNORE INTO medicamentos (id_medicamento, id_adulto, nombre, dosis, frecuencia_horas, creado_en) VALUES (1, 1, 'Omeprazol', '20mg', 24, NOW())");
                 jdbcTemplate.execute("INSERT IGNORE INTO medicamentos (id_medicamento, id_adulto, nombre, dosis, frecuencia_horas, creado_en) VALUES (2, 2, 'Losartán', '50mg', 12, NOW())");
+                jdbcTemplate.execute("INSERT IGNORE INTO medicamentos (id_medicamento, id_adulto, nombre, dosis, frecuencia_horas, creado_en) VALUES (3, 1, 'Paracetamol', '500mg', 8, NOW())");
 
                 // Horarios
                 jdbcTemplate.execute("INSERT IGNORE INTO horarios_medicamento (id_horario, id_medicamento, hora_programada, activo) VALUES (1, 1, '08:00:00', 1)");
                 jdbcTemplate.execute("INSERT IGNORE INTO horarios_medicamento (id_horario, id_medicamento, hora_programada, activo) VALUES (2, 2, '09:00:00', 1)");
+                jdbcTemplate.execute("INSERT IGNORE INTO horarios_medicamento (id_horario, id_medicamento, hora_programada, activo) VALUES (3, 3, '14:00:00', 1)");
 
-                log.info("✅ Datos de prueba (Adultos, Relaciones, Medicamentos) inyectados.");
+                // Registros Toma (Historial para el reporte de adherencia de los ultimos 7 dias)
+                // Omeprazol (id 1): 2 omitidos, 2 tomados
+                jdbcTemplate.execute("INSERT IGNORE INTO registros_toma (id_registro, id_horario, id_adulto, estado, fecha_hora_programada) VALUES (1, 1, 1, 'omitido', DATE_SUB(NOW(), INTERVAL 1 DAY))");
+                jdbcTemplate.execute("INSERT IGNORE INTO registros_toma (id_registro, id_horario, id_adulto, estado, fecha_hora_programada, fecha_hora_registro) VALUES (2, 1, 1, 'tomado', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY))");
+                jdbcTemplate.execute("INSERT IGNORE INTO registros_toma (id_registro, id_horario, id_adulto, estado, fecha_hora_programada) VALUES (3, 1, 1, 'omitido', DATE_SUB(NOW(), INTERVAL 3 DAY))");
+                jdbcTemplate.execute("INSERT IGNORE INTO registros_toma (id_registro, id_horario, id_adulto, estado, fecha_hora_programada, fecha_hora_registro) VALUES (4, 1, 1, 'tomado', DATE_SUB(NOW(), INTERVAL 4 DAY), DATE_SUB(NOW(), INTERVAL 4 DAY))");
+                // Paracetamol (id 3): 3 omitidos
+                jdbcTemplate.execute("INSERT IGNORE INTO registros_toma (id_registro, id_horario, id_adulto, estado, fecha_hora_programada) VALUES (5, 3, 1, 'omitido', DATE_SUB(NOW(), INTERVAL 1 DAY))");
+                jdbcTemplate.execute("INSERT IGNORE INTO registros_toma (id_registro, id_horario, id_adulto, estado, fecha_hora_programada) VALUES (6, 3, 1, 'omitido', DATE_SUB(NOW(), INTERVAL 2 DAY))");
+                jdbcTemplate.execute("INSERT IGNORE INTO registros_toma (id_registro, id_horario, id_adulto, estado, fecha_hora_programada) VALUES (7, 3, 1, 'omitido', DATE_SUB(NOW(), INTERVAL 3 DAY))");
+
+                // Alertas Activas
+                jdbcTemplate.execute("INSERT IGNORE INTO alertas (id_alerta, id_adulto, tipo_alerta, mensaje, resuelta, creado_en) VALUES (1, 1, 'omision_medicacion', 'No se ha registrado la toma del Omeprazol.', 0, DATE_SUB(NOW(), INTERVAL 1 HOUR))");
+                jdbcTemplate.execute("INSERT IGNORE INTO alertas (id_alerta, id_adulto, tipo_alerta, mensaje, resuelta, creado_en) VALUES (2, 1, 'caida_detectada', 'El sensor inteligente reportó una posible caída.', 0, DATE_SUB(NOW(), INTERVAL 30 MINUTE))");
+
+                // Observaciones del Cuidador
+                if (idCuidador > 0) {
+                    jdbcTemplate.execute("INSERT IGNORE INTO observaciones_cuidador (id_observacion, id_cuidador, id_adulto, texto, urgencia, fecha_hora) VALUES (1, " + idCuidador + ", 1, 'La paciente amaneció con excelente estado de ánimo y buena presión arterial.', 'baja', DATE_SUB(NOW(), INTERVAL 4 HOUR))");
+                    jdbcTemplate.execute("INSERT IGNORE INTO observaciones_cuidador (id_observacion, id_cuidador, id_adulto, texto, urgencia, fecha_hora) VALUES (2, " + idCuidador + ", 1, 'Se rehusó levemente a tomar la medicina de la mañana, pero terminó accediendo.', 'media', DATE_SUB(NOW(), INTERVAL 1 HOUR))");
+                }
+
+                log.info("✅ Datos de prueba (Adultos, Relaciones, Medicamentos, Registros, Alertas, Observaciones) inyectados.");
             } catch (Exception e) {
                 log.error("Error al inyectar datos de prueba: {}", e.getMessage());
             }
