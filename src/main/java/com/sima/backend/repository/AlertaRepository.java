@@ -21,6 +21,17 @@ public interface AlertaRepository extends JpaRepository<Alerta, Integer> {
     // Historial de alertas de un adulto
     List<Alerta> findByAdulto_IdAdultoOrderByCreadoEnDesc(Integer idAdulto);
 
+    // Historial de alertas de un adulto en un rango de fechas
+    @Query("""
+            SELECT a FROM Alerta a
+            WHERE a.adulto.idAdulto = :idAdulto
+              AND a.creadoEn BETWEEN :desde AND :hasta
+            ORDER BY a.creadoEn DESC
+            """)
+    List<Alerta> findByAdultoAndRango(@Param("idAdulto") Integer idAdulto,
+                                     @Param("desde") java.time.LocalDateTime desde,
+                                     @Param("hasta") java.time.LocalDateTime hasta);
+
     // Alertas activas por tipo para un adulto
     List<Alerta> findByAdulto_IdAdultoAndTipoAlertaAndResueltaFalse(
             Integer idAdulto, String tipoAlerta);
