@@ -69,6 +69,19 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
+                        // Lecturas de pulsera: POST abierto para la app Android
+                        // TODO: Proteger con API key o JWT para dispositivos antes de producción
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/lecturas-pulsera",
+                                "/api/lecturas-pulsera/",
+                                "/lecturas-pulsera",
+                                "/lecturas-pulsera/"
+                        ).permitAll()
+                        // Lecturas de pulsera: GET requiere autenticación y rol
+                        .requestMatchers(HttpMethod.GET, "/lecturas-pulsera/**")
+                                .hasAnyRole("Administrador", "Familiar", "Cuidador")
+
                         // Solo Administrador puede gestionar usuarios y dispositivos
                         .requestMatchers("/usuarios/**").hasRole("Administrador")
                         .requestMatchers("/dispositivos/**").hasRole("Administrador")
