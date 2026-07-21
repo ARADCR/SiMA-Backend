@@ -31,17 +31,20 @@ public class RecordatorioScheduler {
     private final AlertaRepository alertaRepository;
     private final RelacionUsuarioAdultoRepository relacionRepository;
     private final RegistroTomaRepository registroTomaRepository;
+    private final AlertaAiService alertaAiService;
 
     public RecordatorioScheduler(HorarioMedicamentoRepository horarioRepository,
                                  NotificationService notificationService,
                                  AlertaRepository alertaRepository,
                                  RelacionUsuarioAdultoRepository relacionRepository,
-                                 RegistroTomaRepository registroTomaRepository) {
+                                 RegistroTomaRepository registroTomaRepository,
+                                 AlertaAiService alertaAiService) {
         this.horarioRepository = horarioRepository;
         this.notificationService = notificationService;
         this.alertaRepository = alertaRepository;
         this.relacionRepository = relacionRepository;
         this.registroTomaRepository = registroTomaRepository;
+        this.alertaAiService = alertaAiService;
     }
 
     // Se ejecuta cada minuto en el segundo 0
@@ -95,6 +98,7 @@ public class RecordatorioScheduler {
         alerta.setAdulto(toma.getAdulto());
         alerta.setRegistro(toma);
         alertaRepository.save(alerta);
+        alertaAiService.invalidarCache(idAdulto);
 
         // 2. Construir payload
         Map<String, Object> payload = new HashMap<>();
@@ -131,6 +135,7 @@ public class RecordatorioScheduler {
                 + " - Dosis: " + horario.getMedicamento().getDosis());
         alerta.setAdulto(horario.getMedicamento().getAdulto());
         alertaRepository.save(alerta);
+        alertaAiService.invalidarCache(idAdulto);
 
         // 2. Construir payload de la notificación
         Map<String, Object> payload = new HashMap<>();

@@ -91,6 +91,9 @@ public class SecurityConfig {
                         .requestMatchers("/notifications/**")
                         .hasAnyRole("Administrador", "Familiar", "Cuidador", "Adulto Mayor")
 
+                        // IA: requiere autenticación, RBAC específico se valida a nivel de servicio
+                        .requestMatchers("/ai/**").authenticated()
+
                         // Cualquier otra ruta requiere autenticación
                         .anyRequest().authenticated())
 

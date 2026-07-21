@@ -29,4 +29,9 @@ public class ObservacionRequest {
     private String frecuenciaCardiaca;
 
     private String temperatura;
+
+    // Indica si el Cuidador aceptó explícitamente la sugerencia de urgencia "urgente" generada por la IA
+    // (endpoint /ai/observaciones/evaluar-urgencia). Solo si es true Y urgencia == "urgente" se genera
+    // una Alerta automática de tipo urgencia_signos_vitales — la IA sugiere, el Cuidador decide.
+    private Boolean sugerenciaIaAceptada = false;
 }

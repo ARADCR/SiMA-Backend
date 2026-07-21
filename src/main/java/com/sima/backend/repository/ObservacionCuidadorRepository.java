@@ -15,6 +15,9 @@ public interface ObservacionCuidadorRepository extends JpaRepository<Observacion
     // Observaciones de un adulto ordenadas por fecha (más reciente primero)
     List<ObservacionCuidador> findByAdulto_IdAdultoOrderByFechaHoraDesc(Integer idAdulto);
 
+    // Últimas 5 observaciones de un adulto (para chatbot IA)
+    List<ObservacionCuidador> findTop5ByAdulto_IdAdultoOrderByFechaHoraDesc(Integer idAdulto);
+
     // Observaciones de un adulto en un rango de fechas
     @Query("""
             SELECT o FROM ObservacionCuidador o

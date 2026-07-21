@@ -14,6 +14,9 @@ import java.util.Optional;
 @Repository
 public interface RegistroTomaRepository extends JpaRepository<RegistroToma, Integer> {
 
+    // Últimas 10 tomas registradas de un adulto (para chatbot IA)
+    List<RegistroToma> findTop10ByAdulto_IdAdultoOrderByFechaHoraProgramadaDesc(Integer idAdulto);
+
     // Registros del día actual para un adulto (para chatbot y dashboard)
     @Query("""
             SELECT rt FROM RegistroToma rt
