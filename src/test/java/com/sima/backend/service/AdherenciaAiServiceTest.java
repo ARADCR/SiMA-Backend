@@ -9,6 +9,7 @@ import com.sima.backend.entity.Medicamento;
 import com.sima.backend.entity.RegistroToma;
 import com.sima.backend.exception.UnauthorizedException;
 import com.sima.backend.repository.AdultoMayorRepository;
+import com.sima.backend.repository.MedicamentoRepository;
 import com.sima.backend.repository.RegistroTomaRepository;
 import com.sima.backend.repository.RelacionUsuarioAdultoRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +46,9 @@ class AdherenciaAiServiceTest {
     private AdultoMayorRepository adultoMayorRepository;
 
     @Mock
+    private MedicamentoRepository medicamentoRepository;
+
+    @Mock
     private AiService aiService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -56,7 +60,8 @@ class AdherenciaAiServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReporteService reporteService = new ReporteService(registroTomaRepository, relacionUsuarioAdultoRepository);
+        ReporteService reporteService = new ReporteService(registroTomaRepository, relacionUsuarioAdultoRepository,
+                medicamentoRepository);
         adherenciaAiService = new AdherenciaAiService(reporteService, registroTomaRepository,
                 relacionUsuarioAdultoRepository, adultoMayorRepository, aiService, objectMapper);
     }
