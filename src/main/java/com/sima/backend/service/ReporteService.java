@@ -24,11 +24,14 @@ public class ReporteService {
 
     private final RegistroTomaRepository registroRepository;
     private final RelacionUsuarioAdultoRepository relacionRepository;
+    private final com.sima.backend.repository.MedicamentoRepository medicamentoRepository;
 
     public ReporteService(RegistroTomaRepository registroRepository,
-                          RelacionUsuarioAdultoRepository relacionRepository) {
+                          RelacionUsuarioAdultoRepository relacionRepository,
+                          com.sima.backend.repository.MedicamentoRepository medicamentoRepository) {
         this.registroRepository = registroRepository;
         this.relacionRepository = relacionRepository;
+        this.medicamentoRepository = medicamentoRepository;
     }
 
     @Transactional(readOnly = true)
@@ -56,6 +59,12 @@ public class ReporteService {
 
         // Acumuladores de omisiones por medicamento
         Map<String, Integer> omisionesPorMedicamento = new LinkedHashMap<>();
+        
+        // Pre-llenar con todos los medicamentos activos asignados
+        List<com.sima.backend.entity.Medicamento> medsActivos = medicamentoRepository.findByAdulto_IdAdultoAndActivoTrue(idAdulto);
+        for (com.sima.backend.entity.Medicamento med : medsActivos) {
+            omisionesPorMedicamento.put(med.getNombre(), 0);
+        }
 
         for (RegistroToma rt : registros) {
             // Solo contamos tomas cuya fecha programada ya pasó (evitar que pendientes

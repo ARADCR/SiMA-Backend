@@ -88,7 +88,8 @@ public class SecurityConfig {
                         .requestMatchers("/observaciones/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
 
                         // Notificaciones SSE
-                        .requestMatchers("/notifications/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
+                        .requestMatchers("/notifications/**")
+                        .hasAnyRole("Administrador", "Familiar", "Cuidador", "Adulto Mayor")
 
                         // IA: requiere autenticación, RBAC específico se valida a nivel de servicio
                         .requestMatchers("/ai/**").authenticated()
@@ -109,7 +110,6 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
         // Mapear los orígenes dinámicos split por comas
         java.util.List<String> origins = java.util.Arrays.asList(allowedOrigins.split(","));
         configuration.setAllowedOrigins(origins);
