@@ -90,6 +90,9 @@ public class SecurityConfig {
                         // Notificaciones SSE
                         .requestMatchers("/notifications/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
 
+                        // IA: requiere autenticación, RBAC específico se valida a nivel de servicio
+                        .requestMatchers("/ai/**").authenticated()
+
                         // Cualquier otra ruta requiere autenticación
                         .anyRequest().authenticated())
 

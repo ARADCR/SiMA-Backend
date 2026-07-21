@@ -9,6 +9,7 @@ import com.sima.backend.entity.SolicitudVinculacion;
 import com.sima.backend.entity.Usuario;
 import com.sima.backend.exception.ResourceNotFoundException;
 import com.sima.backend.repository.AdultoMayorRepository;
+import com.sima.backend.repository.PerfilCuidadorRepository;
 import com.sima.backend.repository.RelacionUsuarioAdultoRepository;
 import com.sima.backend.repository.SolicitudVinculacionRepository;
 import com.sima.backend.repository.UsuarioRepository;
@@ -27,22 +28,25 @@ public class VinculacionService {
     private final AdultoMayorRepository adultoRepository;
     private final RelacionUsuarioAdultoRepository relacionRepository;
     private final NotificationService notificationService;
+    private final PerfilCuidadorRepository perfilCuidadorRepository;
 
     public VinculacionService(SolicitudVinculacionRepository solicitudRepository,
                               UsuarioRepository usuarioRepository,
                               AdultoMayorRepository adultoRepository,
                               RelacionUsuarioAdultoRepository relacionRepository,
-                              NotificationService notificationService) {
+                              NotificationService notificationService,
+                              PerfilCuidadorRepository perfilCuidadorRepository) {
         this.solicitudRepository = solicitudRepository;
         this.usuarioRepository = usuarioRepository;
         this.adultoRepository = adultoRepository;
         this.relacionRepository = relacionRepository;
         this.notificationService = notificationService;
+        this.perfilCuidadorRepository = perfilCuidadorRepository;
     }
 
     public List<CuidadorPublicResponse> listarCuidadoresDisponibles() {
         return usuarioRepository.findByRol_NombreRolAndActivoTrue("Cuidador").stream()
-                .map(CuidadorPublicResponse::from)
+                .map(u -> CuidadorPublicResponse.from(u, perfilCuidadorRepository.findByIdUsuario(u.getIdUsuario()).orElse(null)))
                 .collect(Collectors.toList());
     }
 
