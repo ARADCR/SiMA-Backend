@@ -35,10 +35,10 @@ public class UsuarioService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // Listar todos los usuarios activos
+    // Listar todos los usuarios
     @Transactional(readOnly = true)
-    public List<UsuarioResponse> listarActivos() {
-        return usuarioRepository.findByActivoTrue()
+    public List<UsuarioResponse> listarTodos() {
+        return usuarioRepository.findAll()
                 .stream()
                 .map(UsuarioResponse::from)
                 .toList();
@@ -123,5 +123,14 @@ public class UsuarioService {
             throw new ResourceNotFoundException("Usuario", "id", idUsuario);
         }
         usuarioRepository.desactivarUsuario(idUsuario);
+    }
+
+    // Reactivar usuario
+    @Transactional
+    public void reactivar(Integer idUsuario) {
+        if (!usuarioRepository.existsById(idUsuario)) {
+            throw new ResourceNotFoundException("Usuario", "id", idUsuario);
+        }
+        usuarioRepository.activarUsuario(idUsuario);
     }
 }

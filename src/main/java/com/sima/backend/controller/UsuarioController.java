@@ -32,11 +32,11 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
-    /** GET /usuarios — Listar todos los usuarios activos */
+    /** GET /usuarios — Listar todos los usuarios */
     @GetMapping
     public ResponseEntity<ApiResponse<List<UsuarioResponse>>> listar() {
         return ResponseEntity.ok(
-                ApiResponse.ok("Usuarios obtenidos", usuarioService.listarActivos()));
+                ApiResponse.ok("Usuarios obtenidos", usuarioService.listarTodos()));
     }
 
     /** GET /usuarios/{id} — Obtener un usuario por ID */
@@ -72,5 +72,12 @@ public class UsuarioController {
     public ResponseEntity<ApiResponse<Void>> desactivar(@PathVariable Integer id) {
         usuarioService.desactivar(id);
         return ResponseEntity.ok(ApiResponse.ok("Usuario desactivado exitosamente"));
+    }
+
+    /** PUT /usuarios/{id}/reactivar — Reactivar usuario */
+    @PutMapping("/{id}/reactivar")
+    public ResponseEntity<ApiResponse<Void>> reactivar(@PathVariable Integer id) {
+        usuarioService.reactivar(id);
+        return ResponseEntity.ok(ApiResponse.ok("Usuario reactivado exitosamente"));
     }
 }
