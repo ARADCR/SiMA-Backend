@@ -6,8 +6,10 @@ import com.sima.backend.dto.request.AnalisisPerfilRequest;
 import com.sima.backend.dto.request.BusquedaCuidadorIARequest;
 import com.sima.backend.dto.request.ChatRequest;
 import com.sima.backend.dto.request.EvaluarUrgenciaRequest;
+import com.sima.backend.dto.response.AnalisisIotIAResponse;
 import com.sima.backend.dto.response.AnalisisPerfilResponse;
 import com.sima.backend.dto.response.ApiResponse;
+import com.sima.backend.dto.response.BriefingIAResponse;
 import com.sima.backend.dto.response.BusquedaCuidadorIAResponse;
 import com.sima.backend.dto.response.ChatResponse;
 import com.sima.backend.dto.response.EvaluacionUrgenciaResponse;
@@ -22,6 +24,8 @@ import com.sima.backend.security.CustomUserDetails;
 import com.sima.backend.service.AdherenciaAiService;
 import com.sima.backend.service.AlertaAiService;
 import com.sima.backend.service.ChatAiService;
+import com.sima.backend.service.DashboardAiService;
+import com.sima.backend.service.IotAiService;
 import com.sima.backend.service.ObservacionAiService;
 import com.sima.backend.service.PerfilAiService;
 import com.sima.backend.service.RecomendacionAiService;
@@ -55,11 +59,14 @@ public class AiController {
     private final AdherenciaAiService adherenciaAiService;
     private final AlertaAiService alertaAiService;
     private final ObservacionAiService observacionAiService;
+    private final DashboardAiService dashboardAiService;
+    private final IotAiService iotAiService;
 
     public AiController(AiRateLimiter rateLimiter, ChatAiService chatAiService,
             RecomendacionAiService recomendacionAiService, PerfilAiService perfilAiService,
             AdherenciaAiService adherenciaAiService, AlertaAiService alertaAiService,
-            ObservacionAiService observacionAiService) {
+            ObservacionAiService observacionAiService, DashboardAiService dashboardAiService,
+            IotAiService iotAiService) {
         this.rateLimiter = rateLimiter;
         this.chatAiService = chatAiService;
         this.recomendacionAiService = recomendacionAiService;
@@ -67,6 +74,8 @@ public class AiController {
         this.adherenciaAiService = adherenciaAiService;
         this.alertaAiService = alertaAiService;
         this.observacionAiService = observacionAiService;
+        this.dashboardAiService = dashboardAiService;
+        this.iotAiService = iotAiService;
     }
 
     // GET /api/ai/health -> verifica conectividad y modelo configurado
@@ -206,5 +215,36 @@ public class AiController {
         }
         EvaluacionUrgenciaResponse respuesta = observacionAiService.evaluarUrgencia(userDetails.getIdUsuario(), request);
         return ApiResponse.ok("Urgencia evaluada", respuesta);
+    }
+
+    // GET /api/ai/dashboard/briefing -> briefing diario inteligente adaptado al rol (HU-25)
+    @GetMapping("/dashboard/briefing")
+    @PreAuthorize("hasAnyRole('Familiar', 'Cuidador')")
+    public ApiResponse<BriefingIAResponse> obtenerBriefing(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (!rateLimiter.allowRequest(userDetails.getIdUsuario())) {
+            throw new TooManyRequestsException("Límite de solicitudes de IA excedido. Intentá nuevamente en un minuto.");
+        }
+        BriefingIAResponse respuesta = dashboardAiService.generarBriefing(userDetails.getIdUsuario());
+        return ApiResponse.ok("Briefing generado", respuesta);
+    }
+
+    // POST /api/ai/dashboard/briefing/refresh -> fuerza regeneración del briefing (invalida cache)
+    @PostMapping("/dashboard/briefing/refresh")
+    @PreAuthorize("hasAnyRole('Familiar', 'Cuidador')")
+    public ApiResponse<BriefingIAResponse> refrescarBriefing(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (!rateLimiter.allowRequest(userDetails.getIdUsuario())) {
+            throw new TooManyRequestsException("Límite de solicitudes de IA excedido. Intentá nuevamente en un minuto.");
+        }
+        BriefingIAResponse respuesta = dashboardAiService.refrescarBriefing(userDetails.getIdUsuario());
+        return ApiResponse.ok("Briefing regenerado", respuesta);
+    }
+
+    // GET /api/ai/iot/{idAdulto}/analisis -> detección de anomalías IoT contextualizada con IA (HU-26)
+    @GetMapping("/iot/{idAdulto}/analisis")
+    @PreAuthorize("hasAnyRole('Familiar', 'Cuidador')")
+    public ApiResponse<AnalisisIotIAResponse> analisisIot(@PathVariable Integer idAdulto,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        AnalisisIotIAResponse respuesta = iotAiService.obtenerUltimoAnalisis(userDetails.getIdUsuario(), idAdulto);
+        return ApiResponse.ok("Análisis IoT obtenido", respuesta);
     }
 }

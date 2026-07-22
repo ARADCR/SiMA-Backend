@@ -11,6 +11,8 @@ import java.math.BigDecimal;
 @Setter
 public class DatosContactoCuidadorResponse {
 
+    private String nombre;
+    private String apellido;
     private String correo;
     private String telefono;
     private String ciudad;
@@ -19,6 +21,8 @@ public class DatosContactoCuidadorResponse {
 
     public static DatosContactoCuidadorResponse from(Usuario usuario, PerfilCuidador perfil) {
         DatosContactoCuidadorResponse response = new DatosContactoCuidadorResponse();
+        response.setNombre(usuario.getNombre());
+        response.setApellido(usuario.getApellido());
         response.setCorreo(usuario.getCorreo());
 
         if (perfil != null) {

@@ -7,7 +7,11 @@ import com.sima.backend.entity.Usuario;
 import com.sima.backend.exception.BadRequestException;
 import com.sima.backend.exception.ResourceNotFoundException;
 import com.sima.backend.repository.PerfilCuidadorRepository;
+import com.sima.backend.repository.RegistroTomaRepository;
+import com.sima.backend.repository.SolicitudVinculacionRepository;
 import com.sima.backend.repository.UsuarioRepository;
+import com.sima.backend.repository.ResenaRepository;
+import com.sima.backend.dto.response.CuidadorStatsResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,11 +20,20 @@ public class CuidadorPerfilServiceImpl implements CuidadorPerfilService {
 
     private final UsuarioRepository usuarioRepository;
     private final PerfilCuidadorRepository perfilCuidadorRepository;
+    private final SolicitudVinculacionRepository solicitudRepository;
+    private final RegistroTomaRepository registroTomaRepository;
+    private final ResenaRepository resenaRepository;
 
     public CuidadorPerfilServiceImpl(UsuarioRepository usuarioRepository,
-            PerfilCuidadorRepository perfilCuidadorRepository) {
+            PerfilCuidadorRepository perfilCuidadorRepository,
+            SolicitudVinculacionRepository solicitudRepository,
+            RegistroTomaRepository registroTomaRepository,
+            ResenaRepository resenaRepository) {
         this.usuarioRepository = usuarioRepository;
         this.perfilCuidadorRepository = perfilCuidadorRepository;
+        this.solicitudRepository = solicitudRepository;
+        this.registroTomaRepository = registroTomaRepository;
+        this.resenaRepository = resenaRepository;
     }
 
     @Override
@@ -59,5 +72,24 @@ public class CuidadorPerfilServiceImpl implements CuidadorPerfilService {
         perfilCuidadorRepository.save(perfil);
 
         return DatosContactoCuidadorResponse.from(usuario, perfil);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CuidadorStatsResponse getCuidadorStats(Integer idUsuario) {
+        int pacientes = solicitudRepository.countByCuidador_IdUsuarioAndEstado(idUsuario, "aceptada");
+        
+        long tomasTotales = registroTomaRepository.countByUsuarioConfirmador_IdUsuario(idUsuario);
+        long tomasCompletadas = registroTomaRepository.countByUsuarioConfirmador_IdUsuarioAndEstado(idUsuario, "completada");
+        
+        int cumplimiento = 100; // Por defecto 100 si no hay tomas
+        if (tomasTotales > 0) {
+            cumplimiento = (int) Math.round(((double) tomasCompletadas / tomasTotales) * 100);
+        }
+
+        Double promedio = resenaRepository.obtenerPromedioPorCuidador(idUsuario);
+        double calificacion = promedio != null ? Math.round(promedio * 10.0) / 10.0 : 0.0;
+
+        return new CuidadorStatsResponse(pacientes, calificacion, tomasTotales, cumplimiento);
     }
 }

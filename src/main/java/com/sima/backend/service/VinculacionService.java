@@ -62,7 +62,13 @@ public class VinculacionService {
         // Check if there is already a pending request
         if (solicitudRepository.existsByFamiliar_IdUsuarioAndCuidador_IdUsuarioAndAdulto_IdAdultoAndEstado(
                 idFamiliar, cuidador.getIdUsuario(), adulto.getIdAdulto(), "pendiente")) {
-            throw new RuntimeException("Ya existe una solicitud pendiente para este cuidador y adulto mayor.");
+            throw new com.sima.backend.exception.BadRequestException("Ya existe una solicitud pendiente enviada a este cuidador para este adulto mayor.");
+        }
+
+        // Check if they are already linked (aceptada)
+        if (solicitudRepository.existsByFamiliar_IdUsuarioAndCuidador_IdUsuarioAndAdulto_IdAdultoAndEstado(
+                idFamiliar, cuidador.getIdUsuario(), adulto.getIdAdulto(), "aceptada")) {
+            throw new com.sima.backend.exception.BadRequestException("Este cuidador ya está vinculado a este adulto mayor.");
         }
 
         SolicitudVinculacion solicitud = new SolicitudVinculacion();

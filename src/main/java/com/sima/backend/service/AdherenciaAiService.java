@@ -60,20 +60,25 @@ public class AdherenciaAiService {
             patrones temporales, patrones por medicamento, patrones por método de confirmación y
             tendencias a lo largo del período.
 
-            Respondé ÚNICAMENTE con un JSON válido (sin markdown, sin texto adicional) con esta forma exacta:
+            Respondé en formato JSON puro. Tu respuesta debe empezar con '{' y terminar con '}'.
+            No incluyas explicaciones, ni bloques de código markdown, ni texto adicional.
+            
+            Estructura esperada:
             {
               "patronesDetectados": [
                 {
-                  "tipo": "temporal" | "medicamento" | "metodo" | "tendencia",
+                  "tipo": "temporal",
                   "descripcion": "string breve y concreto",
-                  "severidad": "baja" | "media" | "alta",
+                  "severidad": "baja",
                   "recomendacion": "string breve y accionable"
                 }
               ]
             }
 
-            Si no encontrás patrones claros, devolvé "patronesDetectados": []. No inventes patrones que
-            no estén sustentados por los datos.
+            Si los datos indican que el paciente toma toda su medicación correctamente o no hay patrones claros de omisión, devolvé exactamente:
+            {
+              "patronesDetectados": []
+            }
             """;
 
     private final ReporteService reporteService;
@@ -149,9 +154,18 @@ public class AdherenciaAiService {
         String userMessage = """
                 Historial de tomas del adulto mayor (últimas %d días):
                 %s
+                
+                Analizá estos datos y respondé ÚNICAMENTE con el objeto JSON solicitado.
                 """.formatted(DIAS_ANALISIS_PATRONES, serializarRegistros(registros));
 
         String respuestaLlm = aiService.chat(SYSTEM_PROMPT_PATRONES, userMessage, MAX_TOKENS_JSON);
+
+        if (respuestaLlm == null || respuestaLlm.trim().isEmpty()) {
+            log.warn("AdherenciaAiService: El LLM devolvió una respuesta vacía o solo espacios en blanco. Asumiendo sin patrones.");
+            PatronesAdherenciaResponse emptyResponse = new PatronesAdherenciaResponse();
+            emptyResponse.setPatronesDetectados(Collections.emptyList());
+            return emptyResponse;
+        }
 
         PatronesAdherenciaResponse response = parsear(respuestaLlm, PatronesAdherenciaResponse.class);
         if (response == null) {
@@ -224,7 +238,7 @@ public class AdherenciaAiService {
         int inicio = texto.indexOf('{');
         int fin = texto.lastIndexOf('}');
         if (inicio == -1 || fin == -1 || fin < inicio) {
-            throw new IllegalArgumentException("La respuesta del LLM no contiene un JSON válido");
+            throw new IllegalArgumentException("La respuesta del LLM no contiene un JSON válido. Respuesta recibida: " + texto);
         }
         return texto.substring(inicio, fin + 1);
     }

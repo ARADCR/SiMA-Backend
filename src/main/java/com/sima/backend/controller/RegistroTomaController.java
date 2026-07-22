@@ -92,4 +92,36 @@ public class RegistroTomaController {
                         registroTomaService.confirmarToma(
                                 request, userDetails.getIdUsuario())));
     }
+
+    /**
+     * POST /tomas/omitir
+     * Registra una toma como omitida por el cuidador (HU-13).
+     */
+    @PostMapping("/omitir")
+    @PreAuthorize("hasRole('Cuidador')")
+    public ResponseEntity<ApiResponse<RegistroTomaResponse>> omitir(
+            @Valid @RequestBody RegistroTomaRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        return ResponseEntity.ok(
+                ApiResponse.ok("Toma omitida exitosamente",
+                        registroTomaService.omitirToma(
+                                request, userDetails.getIdUsuario())));
+    }
+
+    /**
+     * POST /tomas/revertir/{idRegistro}
+     * Revierte una toma confirmada u omitida a estado pendiente (HU-13).
+     */
+    @PostMapping("/revertir/{idRegistro}")
+    @PreAuthorize("hasRole('Cuidador')")
+    public ResponseEntity<ApiResponse<RegistroTomaResponse>> revertir(
+            @PathVariable Integer idRegistro,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        return ResponseEntity.ok(
+                ApiResponse.ok("Toma revertida a pendiente",
+                        registroTomaService.revertirToma(
+                                idRegistro, userDetails.getIdUsuario())));
+    }
 }
