@@ -13,4 +13,5 @@ public interface SolicitudVinculacionRepository extends JpaRepository<SolicitudV
     List<SolicitudVinculacion> findByFamiliar_IdUsuarioOrderByFechaCreacionDesc(Integer idFamiliar);
     List<SolicitudVinculacion> findTop5ByEstadoOrderByFechaCreacionDesc(String estado);
     boolean existsByFamiliar_IdUsuarioAndCuidador_IdUsuarioAndAdulto_IdAdultoAndEstado(Integer idFamiliar, Integer idCuidador, Integer idAdulto, String estado);
+    int countByCuidador_IdUsuarioAndEstado(Integer idCuidador, String estado);
 }

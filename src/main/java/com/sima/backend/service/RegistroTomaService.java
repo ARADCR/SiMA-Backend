@@ -134,6 +134,60 @@ public class RegistroTomaService {
                 registroRepository.findById(request.getIdRegistro()).orElseThrow());
     }
 
+    // Omitir toma de medicamento (HU-13 - cuidador)
+    @Transactional
+    public RegistroTomaResponse omitirToma(RegistroTomaRequest request, Integer idUsuario) {
+        RegistroToma registro = registroRepository.findById(request.getIdRegistro())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Registro de toma", "id", request.getIdRegistro()));
+
+        // Validar acceso al adulto del registro
+        validarAcceso(idUsuario, registro.getAdulto().getIdAdulto());
+
+        // Solo se puede omitir una toma pendiente
+        if (!"pendiente".equals(registro.getEstado())) {
+            throw new BadRequestException(
+                    "La toma ya fue registrada con estado: " + registro.getEstado());
+        }
+
+        int filasAfectadas = registroRepository.confirmarToma(
+                request.getIdRegistro(),
+                "omitido",
+                "omision_cuidador",
+                LocalDateTime.now(),
+                idUsuario);
+
+        if (filasAfectadas == 0) {
+            throw new BadRequestException("No se pudo omitir la toma. Puede que ya fue procesada.");
+        }
+
+        return RegistroTomaResponse.from(
+                registroRepository.findById(request.getIdRegistro()).orElseThrow());
+    }
+
+    // Revertir toma confirmada u omitida a pendiente (HU-13 - cuidador)
+    @Transactional
+    public RegistroTomaResponse revertirToma(Integer idRegistro, Integer idUsuario) {
+        RegistroToma registro = registroRepository.findById(idRegistro)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Registro de toma", "id", idRegistro));
+
+        validarAcceso(idUsuario, registro.getAdulto().getIdAdulto());
+
+        if ("pendiente".equals(registro.getEstado())) {
+            throw new BadRequestException("La toma ya está en estado pendiente.");
+        }
+
+        int filasAfectadas = registroRepository.revertirToma(idRegistro);
+
+        if (filasAfectadas == 0) {
+            throw new BadRequestException("No se pudo revertir la toma.");
+        }
+
+        return RegistroTomaResponse.from(
+                registroRepository.findById(idRegistro).orElseThrow());
+    }
+
     // ---------------------------------------------------------------
     // Validación RBAC a nivel de datos
     // Solo permite acceso si el usuario (Familiar o Cuidador) tiene
