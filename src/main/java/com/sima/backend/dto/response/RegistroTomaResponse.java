@@ -18,9 +18,7 @@ public class RegistroTomaResponse {
 
     private Integer idRegistro;
     private Integer idAdulto;
-    private Integer idHorario;
-    private String nombreMedicamento;
-    private String dosis;
+    private HorarioDto horario;
     private String estado; // pendiente | tomado | omitido | confirmado_manual
     private String metodoConfirmacion;
     private LocalDateTime fechaHoraProgramada;
@@ -28,21 +26,49 @@ public class RegistroTomaResponse {
     private String observacion;
     private String nombreConfirmador; // Nombre del usuario que confirmó (null si fue IoT/sistema)
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class HorarioDto {
+        private Integer idHorario;
+        private String horaProgramada;
+        private MedicamentoDto medicamento;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class MedicamentoDto {
+        private Integer idMedicamento;
+        private String nombre;
+        private String dosis;
+    }
+
     public static RegistroTomaResponse from(RegistroToma rt) {
         RegistroTomaResponse dto = new RegistroTomaResponse();
         dto.setIdRegistro(rt.getIdRegistro());
         dto.setIdAdulto(rt.getAdulto().getIdAdulto());
-        dto.setIdHorario(rt.getHorario().getIdHorario());
         dto.setEstado(rt.getEstado());
         dto.setMetodoConfirmacion(rt.getMetodoConfirmacion());
         dto.setFechaHoraProgramada(rt.getFechaHoraProgramada());
         dto.setFechaHoraRegistro(rt.getFechaHoraRegistro());
         dto.setObservacion(rt.getObservacion());
 
-        // Datos del medicamento desde el horario
-        if (rt.getHorario() != null && rt.getHorario().getMedicamento() != null) {
-            dto.setNombreMedicamento(rt.getHorario().getMedicamento().getNombre());
-            dto.setDosis(rt.getHorario().getMedicamento().getDosis());
+        if (rt.getHorario() != null) {
+            HorarioDto hDto = new HorarioDto();
+            hDto.setIdHorario(rt.getHorario().getIdHorario());
+            if (rt.getHorario().getHoraProgramada() != null) {
+                hDto.setHoraProgramada(rt.getHorario().getHoraProgramada().toString());
+            }
+
+            if (rt.getHorario().getMedicamento() != null) {
+                MedicamentoDto mDto = new MedicamentoDto();
+                mDto.setIdMedicamento(rt.getHorario().getMedicamento().getIdMedicamento());
+                mDto.setNombre(rt.getHorario().getMedicamento().getNombre());
+                mDto.setDosis(rt.getHorario().getMedicamento().getDosis());
+                hDto.setMedicamento(mDto);
+            }
+            dto.setHorario(hDto);
         }
 
         // Nombre del confirmador si aplica

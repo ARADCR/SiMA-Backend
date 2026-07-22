@@ -19,7 +19,8 @@ import java.util.List;
  */
 /**
  * Controlador para la gestión de usuarios del sistema.
- * Implementación para HU-17: Crear, editar o eliminar cuentas de familiares/cuidadores.
+ * Implementación para HU-17: Crear, editar o eliminar cuentas de
+ * familiares/cuidadores.
  */
 @RestController
 @RequestMapping("/usuarios")
@@ -74,10 +75,17 @@ public class UsuarioController {
         return ResponseEntity.ok(ApiResponse.ok("Usuario desactivado exitosamente"));
     }
 
-    /** PUT /usuarios/{id}/reactivar — Reactivar usuario */
-    @PutMapping("/{id}/reactivar")
-    public ResponseEntity<ApiResponse<Void>> reactivar(@PathVariable Integer id) {
-        usuarioService.reactivar(id);
-        return ResponseEntity.ok(ApiResponse.ok("Usuario reactivado exitosamente"));
+    /** PATCH /usuarios/{id}/activar — Reactivar usuario */
+    @PatchMapping("/{id}/activar")
+    public ResponseEntity<ApiResponse<Void>> activar(@PathVariable Integer id) {
+        usuarioService.activar(id);
+        return ResponseEntity.ok(ApiResponse.ok("Usuario activado exitosamente"));
+    }
+
+    /** PATCH /usuarios/{id}/desactivar — Desactivar usuario (alias explícito) */
+    @PatchMapping("/{id}/desactivar")
+    public ResponseEntity<ApiResponse<Void>> desactivarPatch(@PathVariable Integer id) {
+        usuarioService.desactivar(id);
+        return ResponseEntity.ok(ApiResponse.ok("Usuario desactivado exitosamente"));
     }
 }

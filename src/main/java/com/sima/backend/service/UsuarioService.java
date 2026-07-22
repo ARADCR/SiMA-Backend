@@ -125,9 +125,9 @@ public class UsuarioService {
         usuarioRepository.desactivarUsuario(idUsuario);
     }
 
-    // Reactivar usuario
+    // Activar usuario (HU-17)
     @Transactional
-    public void reactivar(Integer idUsuario) {
+    public void activar(Integer idUsuario) {
         if (!usuarioRepository.existsById(idUsuario)) {
             throw new ResourceNotFoundException("Usuario", "id", idUsuario);
         }

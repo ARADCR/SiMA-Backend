@@ -33,6 +33,11 @@ public class AdultoMayorResponse {
     private Integer familiarId;
     private String familiarNombre;
 
+    // Información del cuidador y métricas
+    private Integer cuidadorId;
+    private String cuidadorNombre;
+    private Integer medicamentosActivos;
+
     public static AdultoMayorResponse from(AdultoMayor a) {
         AdultoMayorResponse dto = new AdultoMayorResponse();
         dto.setIdAdulto(a.getIdAdulto());
@@ -49,7 +54,7 @@ public class AdultoMayorResponse {
             dto.setEdad(Period.between(a.getFechaNacimiento(), LocalDate.now()).getYears());
         }
 
-        // Extraer información del familiar (tipo_relacion = 'familiar')
+        // Extraer información de relaciones
         if (a.getRelaciones() != null) {
             a.getRelaciones().stream()
                     .filter(r -> "familiar".equalsIgnoreCase(r.getTipoRelacion()))
@@ -59,6 +64,24 @@ public class AdultoMayorResponse {
                         dto.setFamiliarNombre(
                                 r.getUsuario().getNombre() + " " + r.getUsuario().getApellido());
                     });
+
+            a.getRelaciones().stream()
+                    .filter(r -> "cuidador_asignado".equalsIgnoreCase(r.getTipoRelacion()) || "cuidador".equalsIgnoreCase(r.getTipoRelacion()))
+                    .findFirst()
+                    .ifPresent(r -> {
+                        dto.setCuidadorId(r.getUsuario().getIdUsuario());
+                        dto.setCuidadorNombre(
+                                r.getUsuario().getNombre() + " " + r.getUsuario().getApellido());
+                    });
+        }
+
+        // Contar medicamentos activos
+        if (a.getMedicamentos() != null) {
+            dto.setMedicamentosActivos((int) a.getMedicamentos().stream()
+                    .filter(m -> m.getActivo() != null && m.getActivo())
+                    .count());
+        } else {
+            dto.setMedicamentosActivos(0);
         }
 
         return dto;

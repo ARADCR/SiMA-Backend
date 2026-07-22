@@ -28,4 +28,10 @@ public class AlertaServiceImpl implements AlertaService {
         }
         return alertaRepository.countByAdulto_IdAdultoAndResueltaFalse(idAdulto);
     }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public void resolverAlerta(Integer idAlerta) {
+        alertaRepository.resolverAlerta(idAlerta);
+    }
 }

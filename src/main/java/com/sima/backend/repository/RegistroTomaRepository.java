@@ -14,6 +14,9 @@ import java.util.Optional;
 @Repository
 public interface RegistroTomaRepository extends JpaRepository<RegistroToma, Integer> {
 
+    // Últimas 10 tomas registradas de un adulto (para chatbot IA)
+    List<RegistroToma> findTop10ByAdulto_IdAdultoOrderByFechaHoraProgramadaDesc(Integer idAdulto);
+
     // Registros del día actual para un adulto (para chatbot y dashboard)
     @Query("""
             SELECT rt FROM RegistroToma rt
@@ -87,4 +90,20 @@ public interface RegistroTomaRepository extends JpaRepository<RegistroToma, Inte
             @Param("metodo") String metodo,
             @Param("fechaRegistro") LocalDateTime fechaRegistro,
             @Param("idUsuario") Integer idUsuario);
+
+    // Revertir una toma confirmada u omitida a 'pendiente' (solo el cuidador puede hacerlo)
+    @Modifying
+    @Query("""
+            UPDATE RegistroToma rt
+            SET rt.estado = 'pendiente',
+                rt.metodoConfirmacion = NULL,
+                rt.fechaHoraRegistro = NULL,
+                rt.usuarioConfirmador = NULL
+            WHERE rt.idRegistro = :idRegistro
+              AND rt.estado <> 'pendiente'
+            """)
+    int revertirToma(@Param("idRegistro") Integer idRegistro);
+
+    long countByUsuarioConfirmador_IdUsuario(Integer idUsuario);
+    long countByUsuarioConfirmador_IdUsuarioAndEstado(Integer idUsuario, String estado);
 }

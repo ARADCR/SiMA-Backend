@@ -13,6 +13,9 @@ import java.util.List;
 @Repository
 public interface EventoIotRepository extends JpaRepository<EventoIot, Integer> {
 
+    // Últimos 10 eventos de un adulto, a través del dispositivo (para chatbot IA)
+    List<EventoIot> findTop10ByDispositivo_Adulto_IdAdultoOrderByFechaHoraDesc(Integer idAdulto);
+
     // Eventos sin procesar (para el scheduler de alertas)
     List<EventoIot> findByProcesadoFalse();
 
