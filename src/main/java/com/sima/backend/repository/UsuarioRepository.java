@@ -23,8 +23,14 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     // Listar usuarios activos por rol
     List<Usuario> findByRol_NombreRolAndActivoTrue(String nombreRol);
 
+    // Contar usuarios activos por rol
+    long countByRol_NombreRolAndActivoTrue(String nombreRol);
+
     // Listar todos los usuarios activos
     List<Usuario> findByActivoTrue();
+
+    // Listar últimos 5 usuarios registrados
+    List<Usuario> findTop5ByOrderByCreadoEnDesc();
 
     // Buscar por wechat_openid (notificaciones)
     Optional<Usuario> findByWechatOpenid(String wechatOpenid);

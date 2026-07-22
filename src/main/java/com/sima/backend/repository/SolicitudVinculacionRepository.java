@@ -11,5 +11,6 @@ import java.util.Optional;
 public interface SolicitudVinculacionRepository extends JpaRepository<SolicitudVinculacion, Integer> {
     List<SolicitudVinculacion> findByCuidador_IdUsuarioAndEstadoOrderByFechaCreacionDesc(Integer idCuidador, String estado);
     List<SolicitudVinculacion> findByFamiliar_IdUsuarioOrderByFechaCreacionDesc(Integer idFamiliar);
+    List<SolicitudVinculacion> findTop5ByEstadoOrderByFechaCreacionDesc(String estado);
     boolean existsByFamiliar_IdUsuarioAndCuidador_IdUsuarioAndAdulto_IdAdultoAndEstado(Integer idFamiliar, Integer idCuidador, Integer idAdulto, String estado);
 }
