@@ -65,8 +65,9 @@ public class SecurityConfig {
                 // Reglas de acceso por endpoint
                 .authorizeHttpRequests(auth -> auth
 
-                        // Endpoints públicos: login y registro
+                        // Endpoints públicos: login y registro, y endpoints del ESP32 (IoT)
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/iot/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // Solo Administrador puede gestionar usuarios y dispositivos
