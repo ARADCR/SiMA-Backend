@@ -59,6 +59,15 @@ public interface RegistroTomaRepository extends JpaRepository<RegistroToma, Inte
             @Param("desde") LocalDateTime desde,
             @Param("hasta") LocalDateTime hasta);
 
+    // Historial general de tomas en un rango de fechas
+    @Query("""
+            SELECT rt FROM RegistroToma rt
+            WHERE rt.fechaHoraProgramada BETWEEN :desde AND :hasta
+            ORDER BY rt.fechaHoraProgramada DESC
+            """)
+    List<RegistroToma> findHistorialGeneralAndRango(@Param("desde") LocalDateTime desde,
+            @Param("hasta") LocalDateTime hasta);
+
     // Cumplimiento semanal: total programadas y tomadas por día (últimos 7 días)
     @Query("""
             SELECT
@@ -73,6 +82,16 @@ public interface RegistroTomaRepository extends JpaRepository<RegistroToma, Inte
             """)
     List<Object[]> findCumplimientoSemanal(@Param("idAdulto") Integer idAdulto,
             @Param("desde") LocalDateTime desde);
+
+    // Estadísticas globales para el Dashboard de Administrador
+    @Query("SELECT COUNT(rt) FROM RegistroToma rt")
+    long countTotalProgramadas();
+
+    @Query("SELECT COUNT(rt) FROM RegistroToma rt WHERE rt.estado IN ('tomado', 'confirmado_manual')")
+    long countTotalTomadas();
+
+    @Query("SELECT COUNT(rt) FROM RegistroToma rt WHERE rt.fechaHoraProgramada >= :desde")
+    long countTomasProgramadasDesde(@Param("desde") LocalDateTime desde);
 
     // Actualizar estado de una toma (permitido según reglas de inmutabilidad)
     @Modifying
