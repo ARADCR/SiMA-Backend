@@ -116,8 +116,12 @@ public class DataSeeder {
                     jdbcTemplate.execute("INSERT IGNORE INTO observaciones_cuidador (id_observacion, id_cuidador, id_adulto, texto, urgencia, fecha_hora) VALUES (1, " + idCuidador + ", 1, 'La paciente amaneció con excelente estado de ánimo y buena presión arterial.', 'baja', DATE_SUB(NOW(), INTERVAL 4 HOUR))");
                     jdbcTemplate.execute("INSERT IGNORE INTO observaciones_cuidador (id_observacion, id_cuidador, id_adulto, texto, urgencia, fecha_hora) VALUES (2, " + idCuidador + ", 1, 'Se rehusó levemente a tomar la medicina de la mañana, pero terminó accediendo.', 'media', DATE_SUB(NOW(), INTERVAL 1 HOUR))");
                 }
+                
+                // Registrar Dispositivos IoT por defecto para la DEMO en Producción
+                jdbcTemplate.execute("INSERT IGNORE INTO dispositivos_iot (identificador_fisico, tipo_dispositivo, id_adulto, activo, fecha_registro, ultima_conexion) VALUES ('PASTILLERO-A1', 'pastillero_esp32', 1, 1, NOW(), NOW())");
+                jdbcTemplate.execute("INSERT IGNORE INTO dispositivos_iot (identificador_fisico, tipo_dispositivo, id_adulto, activo, fecha_registro, ultima_conexion) VALUES ('FF:FF:FF:F2:02:00', 'pulsera', 1, 1, NOW(), NOW())");
 
-                log.info("✅ Datos de prueba (Adultos, Relaciones, Medicamentos, Registros, Alertas, Observaciones) inyectados.");
+                log.info("✅ Datos de prueba (Adultos, Relaciones, Medicamentos, Registros, Alertas, Observaciones, Dispositivos) inyectados.");
             } catch (Exception e) {
                 log.error("Error al inyectar datos de prueba: {}", e.getMessage());
             }
