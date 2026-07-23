@@ -14,11 +14,15 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 
 
+import com.sima.backend.repository.DispositivoIotRepository;
+import com.sima.backend.entity.DispositivoIot;
+import com.sima.backend.repository.AdultoMayorRepository;
+import com.sima.backend.entity.AdultoMayor;
+
 /**
  * DataSeeder: inserta datos iniciales en la base de datos al arrancar la app.
  * Crea los roles del sistema y los usuarios de prueba por defecto.
- * El rol 'Adulto Mayor' se mantiene en la tabla roles por consistencia del modelo,
- * pero no se crea ningún usuario con ese rol: el adulto mayor no es un usuario del sistema.
+ * El rol 'Adulto Mayor' se mantiene en la tabla roles por consistencia del modelo.
  */
 @Configuration
 public class DataSeeder {
@@ -29,7 +33,9 @@ public class DataSeeder {
     public CommandLineRunner seedDatabase(RolRepository rolRepository,
                                           UsuarioRepository usuarioRepository,
                                           PasswordEncoder passwordEncoder,
-                                          JdbcTemplate jdbcTemplate) {
+                                          JdbcTemplate jdbcTemplate,
+                                          DispositivoIotRepository dispositivoRepository,
+                                          AdultoMayorRepository adultoRepository) {
         return args -> {
 
             // ── 1. Crear roles si no existen ──────────────────────────────────
@@ -53,6 +59,20 @@ public class DataSeeder {
                 // Adultos (Solo inserta si no existen. ID 1 y 2 para emparejar con frontend)
                 jdbcTemplate.execute("INSERT IGNORE INTO adultos_mayores (id_adulto, nombre, apellido, activo, creado_en) VALUES (1, 'Elena', 'Rodríguez', 1, NOW())");
                 jdbcTemplate.execute("INSERT IGNORE INTO adultos_mayores (id_adulto, nombre, apellido, activo, creado_en) VALUES (2, 'José', 'Rodríguez', 1, NOW())");
+
+                // Dispositivo IoT Pastillero
+                if (dispositivoRepository.findByIdentificadorFisico("PASTILLERO-A1").isEmpty()) {
+                    AdultoMayor adulto = adultoRepository.findById(1).orElse(null);
+                    if (adulto != null) {
+                        DispositivoIot dispositivo = new DispositivoIot();
+                        dispositivo.setAdulto(adulto);
+                        dispositivo.setTipoDispositivo("pastillero");
+                        dispositivo.setIdentificadorFisico("PASTILLERO-A1");
+                        dispositivo.setActivo(true);
+                        dispositivoRepository.save(dispositivo);
+                        log.info("✅ Dispositivo PASTILLERO-A1 creado para adulto 1");
+                    }
+                }
 
                 Integer idFamiliar = usuarioRepository.findByCorreo("familiar@sima.com").map(Usuario::getIdUsuario).orElse(0);
                 Integer idCuidador = usuarioRepository.findByCorreo("cuidador@sima.com").map(Usuario::getIdUsuario).orElse(0);

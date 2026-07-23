@@ -34,6 +34,8 @@ public class MedicamentoRequest {
     @Max(value = 168, message = "La frecuencia no puede superar 168 horas (1 semana)")
     private Integer frecuenciaHoras;
 
+    private Integer compartimento = 1;
+
     private String observaciones;
 
     @Size(max = 150, message = "El principio activo no puede superar 150 caracteres")

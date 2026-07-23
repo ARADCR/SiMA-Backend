@@ -42,6 +42,7 @@ public class RegistroTomaResponse {
         private Integer idMedicamento;
         private String nombre;
         private String dosis;
+        private Integer compartimento;
     }
 
     public static RegistroTomaResponse from(RegistroToma rt) {
@@ -66,6 +67,7 @@ public class RegistroTomaResponse {
                 mDto.setIdMedicamento(rt.getHorario().getMedicamento().getIdMedicamento());
                 mDto.setNombre(rt.getHorario().getMedicamento().getNombre());
                 mDto.setDosis(rt.getHorario().getMedicamento().getDosis());
+                mDto.setCompartimento(rt.getHorario().getMedicamento().getCompartimento());
                 hDto.setMedicamento(mDto);
             }
             dto.setHorario(hDto);

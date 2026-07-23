@@ -37,6 +37,9 @@ public class Medicamento {
     @Column(name = "frecuencia_horas", nullable = false)
     private Integer frecuenciaHoras; // Solo informativo, la lógica real está en horarios
 
+    @Column(name = "compartimento", nullable = false, columnDefinition = "INT DEFAULT 1")
+    private Integer compartimento = 1;
+
     @Column(name = "activo", nullable = false)
     private Boolean activo = true;
 

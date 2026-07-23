@@ -128,13 +128,15 @@ public class RecordatorioScheduler {
     private void enviarRecordatorio(HorarioMedicamento horario) {
         Integer idAdulto = horario.getMedicamento().getAdulto().getIdAdulto();
 
-        // 1. Crear registro de Alerta en DB
-        Alerta alerta = new Alerta();
-        alerta.setTipoAlerta("RECORDATORIO_MEDICAMENTO");
-        alerta.setMensaje("Hora de tomar: " + horario.getMedicamento().getNombre()
-                + " - Dosis: " + horario.getMedicamento().getDosis());
-        alerta.setAdulto(horario.getMedicamento().getAdulto());
-        alertaRepository.save(alerta);
+        // 0. Crear el RegistroToma para que el ESP32 pueda consultarlo
+        RegistroToma toma = new RegistroToma();
+        toma.setAdulto(horario.getMedicamento().getAdulto());
+        toma.setHorario(horario);
+        toma.setFechaHoraProgramada(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
+        toma.setEstado("pendiente");
+        toma = registroTomaRepository.save(toma);
+
+        // 1. (No creamos Alerta en DB para un simple recordatorio, ya que viola el CHECK constraint de tipo_alerta)
         alertaAiService.invalidarCache(idAdulto);
 
         // 2. Construir payload de la notificación
@@ -143,8 +145,9 @@ public class RecordatorioScheduler {
         payload.put("nombre", horario.getMedicamento().getNombre());
         payload.put("dosis", horario.getMedicamento().getDosis());
         payload.put("hora", horario.getHoraProgramada().toString());
-        payload.put("idAlerta", alerta.getIdAlerta());
+        payload.put("idAlerta", null);
         payload.put("idAdulto", idAdulto);
+        payload.put("idRegistro", toma.getIdRegistro());
 
         // 3. Enviar notificación SSE a todos los Familiares y Cuidadores vinculados al adulto.
         //    El adulto mayor ya no es un usuario del sistema, por lo que la notificación

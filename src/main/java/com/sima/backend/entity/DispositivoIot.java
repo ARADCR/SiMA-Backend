@@ -41,6 +41,9 @@ public class DispositivoIot {
     @Column(name = "fecha_registro", nullable = false, updatable = false)
     private LocalDateTime fechaRegistro;
 
+    @Column(name = "ultima_conexion")
+    private LocalDateTime ultimaConexion;
+
     // Relaciones
     @OneToMany(mappedBy = "dispositivo", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<EventoIot> eventos;

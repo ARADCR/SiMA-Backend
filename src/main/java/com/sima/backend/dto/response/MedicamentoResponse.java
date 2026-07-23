@@ -24,6 +24,7 @@ public class MedicamentoResponse {
     private String nombre;
     private String dosis;
     private Integer frecuenciaHoras;
+    private Integer compartimento;
     private Boolean activo;
     private String observaciones;
     private String principioActivo;
@@ -41,6 +42,7 @@ public class MedicamentoResponse {
         dto.setNombre(m.getNombre());
         dto.setDosis(m.getDosis());
         dto.setFrecuenciaHoras(m.getFrecuenciaHoras());
+        dto.setCompartimento(m.getCompartimento());
         dto.setActivo(m.getActivo());
         dto.setObservaciones(m.getObservaciones());
         dto.setPrincipioActivo(m.getPrincipioActivo());
