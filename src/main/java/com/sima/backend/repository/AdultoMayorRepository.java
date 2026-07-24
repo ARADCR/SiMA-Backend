@@ -39,8 +39,16 @@ public interface AdultoMayorRepository extends JpaRepository<AdultoMayor, Intege
     List<AdultoMayor> findByUsuarioIdAndTipoRelacion(@Param("idUsuario") Integer idUsuario,
             @Param("tipoRelacion") String tipoRelacion);
 
+    // Listar todos los adultos con relaciones (eager fetch para admin)
+    @Query("""
+            SELECT DISTINCT am FROM AdultoMayor am
+            LEFT JOIN FETCH am.relaciones r
+            LEFT JOIN FETCH r.usuario
+            """)
+    List<AdultoMayor> findAllWithRelaciones();
+
     // Desactivar adulto (soft delete)
     @Modifying
     @Query("UPDATE AdultoMayor am SET am.activo = false WHERE am.idAdulto = :id")
     void desactivarAdulto(@Param("id") Integer idAdulto);
-}
+}

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -23,8 +24,14 @@ public class MedicamentoResponse {
     private String nombre;
     private String dosis;
     private Integer frecuenciaHoras;
+    private Integer compartimento;
     private Boolean activo;
     private String observaciones;
+    private String principioActivo;
+    private LocalDate fechaFin;
+    private Integer stockActual;
+    private Integer stockMinimo;
+    private String prescritoPor;
     private LocalDateTime creadoEn;
     private List<HorarioResponse> horarios;
 
@@ -35,8 +42,14 @@ public class MedicamentoResponse {
         dto.setNombre(m.getNombre());
         dto.setDosis(m.getDosis());
         dto.setFrecuenciaHoras(m.getFrecuenciaHoras());
+        dto.setCompartimento(m.getCompartimento());
         dto.setActivo(m.getActivo());
         dto.setObservaciones(m.getObservaciones());
+        dto.setPrincipioActivo(m.getPrincipioActivo());
+        dto.setFechaFin(m.getFechaFin());
+        dto.setStockActual(m.getStockActual());
+        dto.setStockMinimo(m.getStockMinimo());
+        dto.setPrescritoPor(m.getPrescritoPor());
         dto.setCreadoEn(m.getCreadoEn());
 
         if (m.getHorarios() != null) {

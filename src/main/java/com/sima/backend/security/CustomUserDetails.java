@@ -18,6 +18,7 @@ public class CustomUserDetails implements UserDetails {
 
     private final Integer idUsuario;
     private final String correo;
+    private final String nombre;
     private final String password;
     private final String rol;
     private final Boolean activo;
@@ -26,6 +27,7 @@ public class CustomUserDetails implements UserDetails {
     public CustomUserDetails(Usuario usuario) {
         this.idUsuario = usuario.getIdUsuario();
         this.correo = usuario.getCorreo();
+        this.nombre = usuario.getNombre();
         this.password = usuario.getPasswordHash();
         this.rol = usuario.getRol().getNombreRol();
         this.activo = usuario.getActivo();

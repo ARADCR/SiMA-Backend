@@ -28,7 +28,9 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .subject(String.valueOf(userDetails.getIdUsuario()))
+                .claim("userId", userDetails.getIdUsuario())
                 .claim("correo", userDetails.getUsername())
+                .claim("nombre", userDetails.getNombre())
                 .claim("rol", userDetails.getRol())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))

@@ -22,6 +22,8 @@ public class DispositivoIotResponse {
     private String nombreAdulto; // Nombre completo del adulto asignado (null si sin asignar)
     private Boolean activo;
     private LocalDateTime fechaRegistro;
+    private LocalDateTime ultimaConexion;
+    private Boolean online;
 
     public static DispositivoIotResponse from(DispositivoIot d) {
         DispositivoIotResponse dto = new DispositivoIotResponse();
@@ -30,6 +32,15 @@ public class DispositivoIotResponse {
         dto.setTipoDispositivo(d.getTipoDispositivo());
         dto.setActivo(d.getActivo());
         dto.setFechaRegistro(d.getFechaRegistro());
+        dto.setUltimaConexion(d.getUltimaConexion());
+        
+        // Calcular online: Si se reportó en los últimos 30 segundos
+        if (d.getUltimaConexion() != null) {
+            LocalDateTime hace30s = LocalDateTime.now().minusSeconds(30);
+            dto.setOnline(d.getUltimaConexion().isAfter(hace30s));
+        } else {
+            dto.setOnline(false);
+        }
 
         if (d.getAdulto() != null) {
             dto.setIdAdulto(d.getAdulto().getIdAdulto());

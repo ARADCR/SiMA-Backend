@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * HU-12: Registrar o actualizar datos personales del adulto mayor.
- * Accesible por Familiar y Cuidador (con validación de acceso por dato).
+ * Controlador para gestionar la información de los adultos mayores.
+ * Implementación para HU-12: Registrar o actualizar datos personales del adulto mayor.
  */
 @RestController
 @RequestMapping("/adultos")
@@ -82,5 +82,21 @@ public class AdultoMayorController {
         return ResponseEntity.ok(
                 ApiResponse.ok("Adulto mayor actualizado",
                         adultoService.actualizar(id, request, userDetails.getIdUsuario())));
+    }
+
+    /** DELETE /adultos/{id} — Eliminar (soft delete) adulto mayor (solo Admin) */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('Administrador')")
+    public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Integer id) {
+        adultoService.eliminar(id);
+        return ResponseEntity.ok(ApiResponse.ok("Adulto mayor eliminado exitosamente", null));
+    }
+
+    /** PUT /adultos/{id}/reactivar — Reactivar adulto mayor (solo Admin) */
+    @PutMapping("/{id}/reactivar")
+    @PreAuthorize("hasRole('Administrador')")
+    public ResponseEntity<ApiResponse<Void>> reactivar(@PathVariable Integer id) {
+        adultoService.reactivar(id);
+        return ResponseEntity.ok(ApiResponse.ok("Adulto mayor reactivado exitosamente", null));
     }
 }

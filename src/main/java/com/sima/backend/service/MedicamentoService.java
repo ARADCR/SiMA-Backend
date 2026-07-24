@@ -65,7 +65,13 @@ public class MedicamentoService {
         medicamento.setNombre(request.getNombre());
         medicamento.setDosis(request.getDosis());
         medicamento.setFrecuenciaHoras(request.getFrecuenciaHoras());
+        medicamento.setCompartimento(request.getCompartimento());
         medicamento.setObservaciones(request.getObservaciones());
+        medicamento.setPrincipioActivo(request.getPrincipioActivo());
+        medicamento.setFechaFin(request.getFechaFin());
+        medicamento.setStockActual(request.getStockActual());
+        medicamento.setStockMinimo(request.getStockMinimo());
+        medicamento.setPrescritoPor(request.getPrescritoPor());
         medicamento.setActivo(true);
 
         medicamento = medicamentoRepository.save(medicamento);
@@ -107,9 +113,43 @@ public class MedicamentoService {
         medicamento.setNombre(request.getNombre());
         medicamento.setDosis(request.getDosis());
         medicamento.setFrecuenciaHoras(request.getFrecuenciaHoras());
+        medicamento.setCompartimento(request.getCompartimento());
         medicamento.setObservaciones(request.getObservaciones());
+        medicamento.setPrincipioActivo(request.getPrincipioActivo());
+        medicamento.setFechaFin(request.getFechaFin());
+        medicamento.setStockActual(request.getStockActual());
+        medicamento.setStockMinimo(request.getStockMinimo());
+        medicamento.setPrescritoPor(request.getPrescritoPor());
 
-        return MedicamentoResponse.from(medicamentoRepository.save(medicamento));
+        medicamento = medicamentoRepository.save(medicamento);
+
+        // Desactivar horarios anteriores
+        horarioRepository.desactivarHorariosByMedicamento(idMedicamento);
+
+        // Crear los nuevos horarios
+        if (request.getHorarios() != null) {
+            for (var horarioReq : request.getHorarios()) {
+                HorarioMedicamento horario = new HorarioMedicamento();
+                horario.setMedicamento(medicamento);
+                horario.setHoraProgramada(horarioReq.getHoraProgramada());
+                horario.setActivo(true);
+                // Aquí permitimos sobrescribir los horarios, el uq en DB no afecta porque los viejos se podrían borrar,
+                // pero como el uq incluye hora_programada, si se manda la misma hora, dará error si solo se desactivan.
+                // En vez de crear a ciegas, busquemos si ya existe
+                java.util.Optional<HorarioMedicamento> existente = horarioRepository
+                        .findByMedicamento_IdMedicamentoAndHoraProgramada(idMedicamento, horarioReq.getHoraProgramada());
+                
+                if (existente.isPresent()) {
+                    HorarioMedicamento h = existente.get();
+                    h.setActivo(true);
+                    horarioRepository.save(h);
+                } else {
+                    horarioRepository.save(horario);
+                }
+            }
+        }
+
+        return MedicamentoResponse.from(medicamento);
     }
 
     // Desactivar medicamento - soft delete (HU-08)

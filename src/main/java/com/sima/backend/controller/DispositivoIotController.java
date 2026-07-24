@@ -15,11 +15,10 @@ import java.util.List;
 
 /**
  * Controlador para la gestión y asignación de dispositivos IoT (pastilleros, pulseras).
- * Implementación para HU-18: Registrar y asignar dispositivos IoT a un adulto mayor.
+ * HU-18: Registrar y asignar dispositivos IoT a un adulto mayor.
  */
 @RestController
 @RequestMapping("/dispositivos")
-@PreAuthorize("hasRole('Administrador')")
 public class DispositivoIotController {
 
     private final DispositivoIotService dispositivoService;
@@ -30,6 +29,7 @@ public class DispositivoIotController {
 
     /** GET /dispositivos — Listar todos los dispositivos activos */
     @GetMapping
+    @PreAuthorize("hasRole('Administrador')")
     public ResponseEntity<ApiResponse<List<DispositivoIotResponse>>> listar() {
         return ResponseEntity.ok(
                 ApiResponse.ok("Dispositivos obtenidos", dispositivoService.listarTodos()));
@@ -37,6 +37,7 @@ public class DispositivoIotController {
 
     /** GET /dispositivos/sin-asignar — Dispositivos sin adulto asignado */
     @GetMapping("/sin-asignar")
+    @PreAuthorize("hasRole('Administrador')")
     public ResponseEntity<ApiResponse<List<DispositivoIotResponse>>> listarSinAsignar() {
         return ResponseEntity.ok(
                 ApiResponse.ok("Dispositivos sin asignar", dispositivoService.listarSinAsignar()));
@@ -44,6 +45,7 @@ public class DispositivoIotController {
 
     /** GET /dispositivos/adulto/{idAdulto} — Dispositivos de un adulto */
     @GetMapping("/adulto/{idAdulto}")
+    @PreAuthorize("hasAnyRole('Administrador', 'Familiar', 'Cuidador')")
     public ResponseEntity<ApiResponse<List<DispositivoIotResponse>>> listarPorAdulto(
             @PathVariable Integer idAdulto) {
 
@@ -54,6 +56,7 @@ public class DispositivoIotController {
 
     /** POST /dispositivos — Registrar nuevo dispositivo */
     @PostMapping
+    @PreAuthorize("hasRole('Administrador')")
     public ResponseEntity<ApiResponse<DispositivoIotResponse>> registrar(
             @Valid @RequestBody DispositivoIotRequest request) {
 
@@ -65,6 +68,7 @@ public class DispositivoIotController {
 
     /** PUT /dispositivos/{id}/asignar — Asignar dispositivo a un adulto */
     @PutMapping("/{id}/asignar")
+    @PreAuthorize("hasRole('Administrador')")
     public ResponseEntity<ApiResponse<DispositivoIotResponse>> asignar(
             @PathVariable Integer id,
             @Valid @RequestBody AsignarDispositivoRequest request) {
@@ -76,6 +80,7 @@ public class DispositivoIotController {
 
     /** PUT /dispositivos/{id}/desasignar — Desasignar dispositivo de su adulto */
     @PutMapping("/{id}/desasignar")
+    @PreAuthorize("hasRole('Administrador')")
     public ResponseEntity<ApiResponse<DispositivoIotResponse>> desasignar(
             @PathVariable Integer id) {
 
@@ -86,6 +91,7 @@ public class DispositivoIotController {
 
     /** PUT /dispositivos/{id} — Actualizar datos del dispositivo */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('Administrador')")
     public ResponseEntity<ApiResponse<DispositivoIotResponse>> actualizar(
             @PathVariable Integer id,
             @Valid @RequestBody DispositivoIotRequest request) {

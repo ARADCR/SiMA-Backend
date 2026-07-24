@@ -65,26 +65,48 @@ public class SecurityConfig {
                 // Reglas de acceso por endpoint
                 .authorizeHttpRequests(auth -> auth
 
-                        // Endpoints públicos: login y registro
+                        // Endpoints públicos: login y registro, y endpoints del ESP32 (IoT)
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/iot/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // Lecturas de pulsera: POST abierto para la app Android
+                        // TODO: Proteger con API key o JWT para dispositivos antes de producción
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/lecturas-pulsera",
+                                "/api/lecturas-pulsera/",
+                                "/lecturas-pulsera",
+                                "/lecturas-pulsera/"
+                        ).permitAll()
+                        // Lecturas de pulsera: GET requiere autenticación y rol
+                        .requestMatchers(HttpMethod.GET, "/lecturas-pulsera/**")
+                                .hasAnyRole("Administrador", "Familiar", "Cuidador")
 
                         // Solo Administrador puede gestionar usuarios y dispositivos
                         .requestMatchers("/usuarios/**").hasRole("Administrador")
+                        .requestMatchers(HttpMethod.GET, "/dispositivos/adulto/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
                         .requestMatchers("/dispositivos/**").hasRole("Administrador")
 
                         // Familiar y Cuidador gestionan adultos y medicamentos
                         .requestMatchers("/adultos/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
                         .requestMatchers("/medicamentos/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
 
-                        // Registros de toma: todos los roles excepto Administrador
-                        .requestMatchers("/tomas/**").hasAnyRole("Familiar", "Cuidador", "Adulto Mayor")
+                        // Registros de toma: Familiar y Cuidador
+                        .requestMatchers("/tomas/**").hasAnyRole("Familiar", "Cuidador")
 
                         // Alertas: Familiar y Cuidador
                         .requestMatchers("/alertas/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
 
+                        // Observaciones del cuidador: Cuidador registra, Familiar y Administrador solo consultan
+                        .requestMatchers("/observaciones/**").hasAnyRole("Administrador", "Familiar", "Cuidador")
+
                         // Notificaciones SSE
-                        .requestMatchers("/notifications/**").hasAnyRole("Administrador", "Familiar", "Cuidador", "Adulto Mayor")
+                        .requestMatchers("/notifications/**")
+                        .hasAnyRole("Administrador", "Familiar", "Cuidador", "Adulto Mayor")
+
+                        // IA: requiere autenticación, RBAC específico se valida a nivel de servicio
+                        .requestMatchers("/ai/**").authenticated()
 
                         // Cualquier otra ruta requiere autenticación
                         .anyRequest().authenticated())
@@ -96,11 +118,17 @@ public class SecurityConfig {
         return http.build();
     }
 
+    @org.springframework.beans.factory.annotation.Value("${CORS_ALLOWED_ORIGINS:http://localhost:4200}")
+    private String allowedOrigins;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200")); // URL de Angular
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // Mapear los orígenes dinámicos split por comas
+        java.util.List<String> origins = java.util.Arrays.asList(allowedOrigins.split(","));
+        configuration.setAllowedOrigins(origins);
+        
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 

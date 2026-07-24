@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -33,7 +34,23 @@ public class MedicamentoRequest {
     @Max(value = 168, message = "La frecuencia no puede superar 168 horas (1 semana)")
     private Integer frecuenciaHoras;
 
+    private Integer compartimento = 1;
+
     private String observaciones;
+
+    @Size(max = 150, message = "El principio activo no puede superar 150 caracteres")
+    private String principioActivo;
+
+    private LocalDate fechaFin;
+
+    @Min(value = 0, message = "El stock actual no puede ser negativo")
+    private Integer stockActual;
+
+    @Min(value = 0, message = "El stock mínimo no puede ser negativo")
+    private Integer stockMinimo;
+
+    @Size(max = 150, message = "El nombre del prescriptor no puede superar 150 caracteres")
+    private String prescritoPor;
 
     // Horarios de toma asociados al medicamento
     // Se crean en la misma transacción que el medicamento

@@ -17,6 +17,11 @@ import java.util.List;
  * HU-17: Crear, editar y desactivar cuentas de familiares/cuidadores.
  * Solo accesible por el rol Administrador.
  */
+/**
+ * Controlador para la gestión de usuarios del sistema.
+ * Implementación para HU-17: Crear, editar o eliminar cuentas de
+ * familiares/cuidadores.
+ */
 @RestController
 @RequestMapping("/usuarios")
 @PreAuthorize("hasRole('Administrador')")
@@ -28,11 +33,11 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
-    /** GET /usuarios — Listar todos los usuarios activos */
+    /** GET /usuarios — Listar todos los usuarios */
     @GetMapping
     public ResponseEntity<ApiResponse<List<UsuarioResponse>>> listar() {
         return ResponseEntity.ok(
-                ApiResponse.ok("Usuarios obtenidos", usuarioService.listarActivos()));
+                ApiResponse.ok("Usuarios obtenidos", usuarioService.listarTodos()));
     }
 
     /** GET /usuarios/{id} — Obtener un usuario por ID */
@@ -66,6 +71,20 @@ public class UsuarioController {
     /** DELETE /usuarios/{id} — Desactivar usuario (soft delete) */
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> desactivar(@PathVariable Integer id) {
+        usuarioService.desactivar(id);
+        return ResponseEntity.ok(ApiResponse.ok("Usuario desactivado exitosamente"));
+    }
+
+    /** PATCH /usuarios/{id}/activar — Reactivar usuario */
+    @PatchMapping("/{id}/activar")
+    public ResponseEntity<ApiResponse<Void>> activar(@PathVariable Integer id) {
+        usuarioService.activar(id);
+        return ResponseEntity.ok(ApiResponse.ok("Usuario activado exitosamente"));
+    }
+
+    /** PATCH /usuarios/{id}/desactivar — Desactivar usuario (alias explícito) */
+    @PatchMapping("/{id}/desactivar")
+    public ResponseEntity<ApiResponse<Void>> desactivarPatch(@PathVariable Integer id) {
         usuarioService.desactivar(id);
         return ResponseEntity.ok(ApiResponse.ok("Usuario desactivado exitosamente"));
     }

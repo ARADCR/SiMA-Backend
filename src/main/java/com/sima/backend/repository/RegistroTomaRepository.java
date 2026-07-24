@@ -14,6 +14,9 @@ import java.util.Optional;
 @Repository
 public interface RegistroTomaRepository extends JpaRepository<RegistroToma, Integer> {
 
+    // Últimas 10 tomas registradas de un adulto (para chatbot IA)
+    List<RegistroToma> findTop10ByAdulto_IdAdultoOrderByFechaHoraProgramadaDesc(Integer idAdulto);
+
     // Registros del día actual para un adulto (para chatbot y dashboard)
     @Query("""
             SELECT rt FROM RegistroToma rt
@@ -56,6 +59,15 @@ public interface RegistroTomaRepository extends JpaRepository<RegistroToma, Inte
             @Param("desde") LocalDateTime desde,
             @Param("hasta") LocalDateTime hasta);
 
+    // Historial general de tomas en un rango de fechas
+    @Query("""
+            SELECT rt FROM RegistroToma rt
+            WHERE rt.fechaHoraProgramada BETWEEN :desde AND :hasta
+            ORDER BY rt.fechaHoraProgramada DESC
+            """)
+    List<RegistroToma> findHistorialGeneralAndRango(@Param("desde") LocalDateTime desde,
+            @Param("hasta") LocalDateTime hasta);
+
     // Cumplimiento semanal: total programadas y tomadas por día (últimos 7 días)
     @Query("""
             SELECT
@@ -70,6 +82,16 @@ public interface RegistroTomaRepository extends JpaRepository<RegistroToma, Inte
             """)
     List<Object[]> findCumplimientoSemanal(@Param("idAdulto") Integer idAdulto,
             @Param("desde") LocalDateTime desde);
+
+    // Estadísticas globales para el Dashboard de Administrador
+    @Query("SELECT COUNT(rt) FROM RegistroToma rt")
+    long countTotalProgramadas();
+
+    @Query("SELECT COUNT(rt) FROM RegistroToma rt WHERE rt.estado IN ('tomado', 'confirmado_manual')")
+    long countTotalTomadas();
+
+    @Query("SELECT COUNT(rt) FROM RegistroToma rt WHERE rt.fechaHoraProgramada >= :desde")
+    long countTomasProgramadasDesde(@Param("desde") LocalDateTime desde);
 
     // Actualizar estado de una toma (permitido según reglas de inmutabilidad)
     @Modifying
@@ -87,4 +109,20 @@ public interface RegistroTomaRepository extends JpaRepository<RegistroToma, Inte
             @Param("metodo") String metodo,
             @Param("fechaRegistro") LocalDateTime fechaRegistro,
             @Param("idUsuario") Integer idUsuario);
+
+    // Revertir una toma confirmada u omitida a 'pendiente' (solo el cuidador puede hacerlo)
+    @Modifying
+    @Query("""
+            UPDATE RegistroToma rt
+            SET rt.estado = 'pendiente',
+                rt.metodoConfirmacion = NULL,
+                rt.fechaHoraRegistro = NULL,
+                rt.usuarioConfirmador = NULL
+            WHERE rt.idRegistro = :idRegistro
+              AND rt.estado <> 'pendiente'
+            """)
+    int revertirToma(@Param("idRegistro") Integer idRegistro);
+
+    long countByUsuarioConfirmador_IdUsuario(Integer idUsuario);
+    long countByUsuarioConfirmador_IdUsuarioAndEstado(Integer idUsuario, String estado);
 }
