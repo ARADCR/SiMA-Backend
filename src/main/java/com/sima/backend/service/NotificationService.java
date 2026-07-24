@@ -1,5 +1,6 @@
 package com.sima.backend.service;
 
+import com.sima.backend.repository.UsuarioRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,14 @@ public class NotificationService {
     
     // Mapa que asocia el idUsuario (Familiar/Cuidador) con su SseEmitter
     private final Map<Integer, SseEmitter> emitters = new ConcurrentHashMap<>();
+
+    private final TelegramService telegramService;
+    private final UsuarioRepository usuarioRepository;
+
+    public NotificationService(TelegramService telegramService, UsuarioRepository usuarioRepository) {
+        this.telegramService = telegramService;
+        this.usuarioRepository = usuarioRepository;
+    }
 
     public SseEmitter subscribe(Integer idUsuario) {
         // Timeout configurado a 0 (infinito) o algo muy largo
@@ -66,5 +75,30 @@ public class NotificationService {
         } else {
             log.debug("No hay cliente conectado para idUsuario={}. La notificación no se entregó en tiempo real.", idUsuario);
         }
+
+        // Enviar a Telegram de forma asíncrona
+        usuarioRepository.findById(idUsuario).ifPresent(usuario -> {
+            if (usuario.getTelegramChatId() != null && !usuario.getTelegramChatId().isBlank()) {
+                String mensajeTelegram = formatearMensajeTelegram(eventName, data);
+                telegramService.sendMessage(usuario.getTelegramChatId(), mensajeTelegram);
+            }
+        });
+    }
+
+    private String formatearMensajeTelegram(String eventName, Object data) {
+        if (data instanceof Map) {
+            Map<?, ?> payload = (Map<?, ?>) data;
+            switch (eventName) {
+                case "RECORDATORIO_MEDICAMENTO":
+                    return "💊 Recordatorio: Es hora de dar " + payload.get("nombre") + " - Dosis: " + payload.get("dosis");
+                case "DOSIS_NO_TOMADA":
+                    return "⚠️ Alerta: " + payload.get("nombre") + " no fue tomado a las " + payload.get("horaProgramada");
+                case "urgencia_signos_vitales":
+                    return "🚨 URGENTE: " + payload.get("mensaje");
+                default:
+                    return "🔔 Notificación: " + eventName + "\nDetalles: " + data.toString();
+            }
+        }
+        return "🔔 Notificación: " + eventName + "\nDetalles: " + (data != null ? data.toString() : "");
     }
 }

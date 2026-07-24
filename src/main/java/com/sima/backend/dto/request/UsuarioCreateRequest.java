@@ -38,4 +38,8 @@ public class UsuarioCreateRequest {
     // Opcional: solo para usuarios que van a recibir notificaciones WeChat
     @Size(max = 100, message = "El OpenID de WeChat no puede superar 100 caracteres")
     private String wechatOpenid;
+
+    // Opcional: solo para usuarios que van a recibir notificaciones Telegram
+    @Size(max = 50, message = "El Chat ID de Telegram no puede superar 50 caracteres")
+    private String telegramChatId;
 }

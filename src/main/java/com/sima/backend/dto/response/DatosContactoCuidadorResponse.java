@@ -18,12 +18,14 @@ public class DatosContactoCuidadorResponse {
     private String ciudad;
     private BigDecimal tarifaHora;
     private String disponibilidad;
+    private String telegramChatId;
 
     public static DatosContactoCuidadorResponse from(Usuario usuario, PerfilCuidador perfil) {
         DatosContactoCuidadorResponse response = new DatosContactoCuidadorResponse();
         response.setNombre(usuario.getNombre());
         response.setApellido(usuario.getApellido());
         response.setCorreo(usuario.getCorreo());
+        response.setTelegramChatId(usuario.getTelegramChatId());
 
         if (perfil != null) {
             response.setTelefono(perfil.getTelefono());

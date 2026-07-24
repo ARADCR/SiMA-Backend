@@ -39,4 +39,8 @@ public class UsuarioUpdateRequest {
     // Opcional: para actualizar el OpenID de WeChat
     @Size(max = 100, message = "El OpenID de WeChat no puede superar 100 caracteres")
     private String wechatOpenid;
+
+    // Opcional: para actualizar el Chat ID de Telegram
+    @Size(max = 50, message = "El Chat ID de Telegram no puede superar 50 caracteres")
+    private String telegramChatId;
 }

@@ -75,6 +75,7 @@ public class UsuarioService {
         usuario.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         usuario.setRol(rol);
         usuario.setWechatOpenid(request.getWechatOpenid());
+        usuario.setTelegramChatId(request.getTelegramChatId());
         usuario.setActivo(true);
 
         return UsuarioResponse.from(usuarioRepository.save(usuario));
@@ -99,6 +100,7 @@ public class UsuarioService {
         usuario.setApellido(request.getApellido());
         usuario.setCorreo(request.getCorreo());
         usuario.setWechatOpenid(request.getWechatOpenid());
+        usuario.setTelegramChatId(request.getTelegramChatId());
 
         // Solo actualizar contraseña si viene en el request
         if (StringUtils.hasText(request.getPassword())) {
