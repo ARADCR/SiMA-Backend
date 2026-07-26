@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface CredencialCuidadorRepository extends JpaRepository<CredencialCuidador, Integer> {
     List<CredencialCuidador> findByCuidadorIdUsuarioOrderByFechaSubidaDesc(Integer idCuidador);
+    List<CredencialCuidador> findAllByOrderByFechaSubidaDesc();
+    List<CredencialCuidador> findTop5ByEstadoOrderByFechaSubidaDesc(String estado);
 }

@@ -68,6 +68,7 @@ public class SecurityConfig {
                         // Endpoints públicos: login y registro, y endpoints del ESP32 (IoT)
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/iot/**").permitAll()
+                        .requestMatchers("/api/archivos/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // Lecturas de pulsera: POST abierto para la app Android

@@ -131,7 +131,8 @@ public class IotAiService {
 
         return analisisIotIARepository.findTopByAdulto_IdAdultoOrderByFechaAnalisisDesc(idAdulto)
                 .filter(a -> a.getFechaAnalisis() != null
-                        && a.getFechaAnalisis().isAfter(LocalDateTime.now().minusHours(CACHE_TTL_HORAS)))
+                        && a.getFechaAnalisis().isAfter(LocalDateTime.now().minusHours(CACHE_TTL_HORAS))
+                        && !SIN_DATOS_MENSAJE.equals(a.getResumenEstado()))
                 .map(this::mapearDesdeCache)
                 .orElseGet(() -> analizar(idUsuario, idAdulto));
     }
@@ -153,11 +154,7 @@ public class IotAiService {
 
         List<EventoIot> eventosRecientes = eventoIotRepository.findByAdultoAndRango(idAdulto, desde7Dias, ahora);
 
-        if (eventosRecientes.isEmpty()) {
-            AnalisisIotIAResponse sinDatos = respuestaSinDatos();
-            persistir(adulto, sinDatos);
-            return sinDatos;
-        }
+        // No retornar "Sin datos" inmediatamente para que el LLM analice el historial o datos médicos.
 
         List<EventoIot> eventosHistoricos = eventoIotRepository.findByAdultoAndRango(idAdulto, desde30Dias, ahora);
 

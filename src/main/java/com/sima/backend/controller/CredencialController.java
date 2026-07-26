@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -31,12 +33,14 @@ public class CredencialController {
         return ApiResponse.ok("Credenciales obtenidas exitosamente", credenciales);
     }
 
-    @PostMapping
+    @PostMapping(consumes = {"multipart/form-data"})
     @PreAuthorize("hasRole('Cuidador')")
     public ApiResponse<CredencialResponse> crearCredencial(
-            @Valid @RequestBody CrearCredencialRequest request,
+            @RequestParam("tipo") String tipo,
+            @RequestParam("nombre") String nombre,
+            @RequestParam(value = "file", required = false) MultipartFile file,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        CredencialResponse nueva = credencialService.crearCredencial(userDetails.getIdUsuario(), request);
+        CredencialResponse nueva = credencialService.crearCredencial(userDetails.getIdUsuario(), tipo, nombre, file);
         return ApiResponse.ok("Credencial subida exitosamente", nueva);
     }
 }

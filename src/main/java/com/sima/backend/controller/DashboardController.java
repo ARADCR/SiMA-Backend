@@ -28,6 +28,10 @@ import java.time.LocalDateTime;
 import java.time.DayOfWeek;
 import java.time.temporal.TemporalAdjusters;
 
+import com.sima.backend.security.CustomUserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.sima.backend.service.TelegramService;
+
 @RestController
 @RequestMapping("/dashboard")
 public class DashboardController {
@@ -55,6 +59,12 @@ public class DashboardController {
 
     @Autowired
     private PdfGeneratorService pdfGeneratorService;
+
+    @Autowired
+    private TelegramService telegramService;
+
+    @Autowired
+    private CredencialCuidadorRepository credencialCuidadorRepository;
 
     @GetMapping("/admin")
     public ResponseEntity<AdminDashboardResponse> getAdminDashboard() {
@@ -109,19 +119,19 @@ public class DashboardController {
         response.setUsuarios(userDtos);
 
         // 3. Pending Credentials
-        List<SolicitudVinculacion> pendingReqs = solicitudVinculacionRepository.findTop5ByEstadoOrderByFechaCreacionDesc("pendiente");
-        List<PendingCredentialDto> pendingDtos = pendingReqs.stream().map(s -> {
+        List<com.sima.backend.entity.CredencialCuidador> pendingReqs = credencialCuidadorRepository.findTop5ByEstadoOrderByFechaSubidaDesc("pendiente");
+        List<PendingCredentialDto> pendingDtos = pendingReqs.stream().map(c -> {
             PendingCredentialDto dto = new PendingCredentialDto();
-            dto.setId(s.getIdSolicitud());
-            Usuario c = s.getCuidador();
+            dto.setId(c.getIdCredencial());
+            Usuario u = c.getCuidador();
             
-            String init1 = c.getNombre() != null && !c.getNombre().isEmpty() ? c.getNombre().substring(0, 1) : "";
-            String init2 = c.getApellido() != null && !c.getApellido().isEmpty() ? c.getApellido().substring(0, 1) : "";
+            String init1 = u.getNombre() != null && !u.getNombre().isEmpty() ? u.getNombre().substring(0, 1) : "";
+            String init2 = u.getApellido() != null && !u.getApellido().isEmpty() ? u.getApellido().substring(0, 1) : "";
             dto.setInitials((init1 + init2).toUpperCase());
             
-            dto.setName(c.getNombre() + " " + c.getApellido());
-            dto.setDocType("Revisión de perfil");
-            dto.setDate(s.getFechaCreacion().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            dto.setName(u.getNombre() + " " + u.getApellido());
+            dto.setDocType(c.getTipo());
+            dto.setDate(c.getFechaSubida().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             return dto;
         }).collect(Collectors.toList());
         response.setPendingCredentials(pendingDtos);
@@ -275,5 +285,44 @@ public class DashboardController {
         }
         reporteGeneradoRepository.deleteById(id);
         return ResponseEntity.ok(ApiResponse.ok("Reporte eliminado exitosamente", null));
+    }
+
+    @PostMapping("/reportes/{id}/telegram")
+    public ResponseEntity<ApiResponse<Void>> enviarReporteTelegram(@PathVariable Integer id, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        java.util.Optional<ReporteGenerado> op = reporteGeneradoRepository.findById(id);
+        if (op.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        ReporteGenerado reporte = op.get();
+
+        Usuario adminUser = usuarioRepository.findById(userDetails.getIdUsuario()).orElse(null);
+        if (adminUser == null || adminUser.getTelegramChatId() == null || adminUser.getTelegramChatId().isBlank()) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("El usuario no tiene un Chat ID de Telegram configurado."));
+        }
+
+        LocalDateTime inicio = reporte.getFechaInicio();
+        LocalDateTime fin = reporte.getFechaFin();
+        if (inicio == null) {
+            fin = LocalDateTime.now();
+            inicio = fin.minusDays(30);
+        }
+
+        List<com.sima.backend.entity.RegistroToma> tomas;
+        List<Alerta> alertas;
+
+        if (reporte.getAdultoMayorId() != null) {
+            tomas = registroTomaRepository.findHistorialByAdultoAndRango(reporte.getAdultoMayorId(), inicio, fin);
+            alertas = alertaRepository.findByAdultoAndRango(reporte.getAdultoMayorId(), inicio, fin);
+        } else {
+            tomas = registroTomaRepository.findHistorialGeneralAndRango(inicio, fin);
+            alertas = alertaRepository.findGeneralAndRango(inicio, fin);
+        }
+
+        byte[] pdfBytes = pdfGeneratorService.generateReportPdf(reporte, tomas, alertas);
+        String filename = "reporte_" + id + ".pdf";
+
+        telegramService.sendDocument(adminUser.getTelegramChatId(), pdfBytes, filename, "Acá tenés el reporte solicitado: " + reporte.getNombre());
+
+        return ResponseEntity.ok(ApiResponse.ok("Reporte enviado por Telegram exitosamente", null));
     }
 }

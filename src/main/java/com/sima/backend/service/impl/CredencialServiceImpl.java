@@ -9,6 +9,9 @@ import com.sima.backend.repository.UsuarioRepository;
 import com.sima.backend.service.CredencialService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.sima.backend.service.FileStorageService;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -21,6 +24,7 @@ public class CredencialServiceImpl implements CredencialService {
 
     private final CredencialCuidadorRepository credencialRepository;
     private final UsuarioRepository usuarioRepository;
+    private final FileStorageService fileStorageService;
 
     @Override
     public List<CredencialResponse> obtenerCredencialesPorCuidador(Integer idCuidador) {
@@ -31,21 +35,25 @@ public class CredencialServiceImpl implements CredencialService {
     }
 
     @Override
-    public CredencialResponse crearCredencial(Integer idCuidador, CrearCredencialRequest request) {
+    public CredencialResponse crearCredencial(Integer idCuidador, String tipo, String nombre, MultipartFile file) {
         Usuario cuidador = usuarioRepository.findById(idCuidador)
                 .orElseThrow(() -> new RuntimeException("Cuidador no encontrado"));
 
         CredencialCuidador credencial = new CredencialCuidador();
         credencial.setCuidador(cuidador);
-        credencial.setTipo(request.getTipo());
-        credencial.setNombre(request.getNombre());
+        credencial.setTipo(tipo);
+        credencial.setNombre(nombre);
         credencial.setFechaSubida(LocalDateTime.now());
         credencial.setEstado("pendiente");
         
-        // Si el frontend envía un nombre de archivo falso, lo usamos, si no ponemos uno genérico
-        String url = request.getArchivoFalsoNombre() != null && !request.getArchivoFalsoNombre().isEmpty() 
-                ? request.getArchivoFalsoNombre() 
-                : "documento-adjunto.pdf";
+        String url = "documento-adjunto.pdf";
+        if (file != null && !file.isEmpty()) {
+            String fileName = fileStorageService.storeFile(file, "credenciales");
+            url = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/api/archivos/credenciales/")
+                    .path(fileName)
+                    .toUriString();
+        }
         credencial.setArchivoUrl(url);
 
         CredencialCuidador guardada = credencialRepository.save(credencial);
