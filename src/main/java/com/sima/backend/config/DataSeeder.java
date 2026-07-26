@@ -48,11 +48,11 @@ public class DataSeeder {
             String passwordHash = passwordEncoder.encode("Admin1234");
 
             seedUsuario(usuarioRepository, rolRepository, passwordHash,
-                    "Admin",    "SiMA",     "admin@sima.com",    "Administrador");
+                    "Admin",    "SiMA",     "admin@sima.com",    "Administrador", null);
             seedUsuario(usuarioRepository, rolRepository, passwordHash,
-                    "Familiar", "SiMA",     "familiar@sima.com", "Familiar");
+                    "Familiar", "SiMA",     "familiar@sima.com", "Familiar", null);
             seedUsuario(usuarioRepository, rolRepository, passwordHash,
-                    "Cuidador", "SiMA",     "cuidador@sima.com", "Cuidador");
+                    "Cuidador", "SiMA",     "cuidador@sima.com", "Cuidador", "DEMO_CHAT_ID_CUIDADOR");
 
             // ── 3. Insertar datos de prueba para Adulto, Relaciones, y Medicamentos ────────
             try {
@@ -142,7 +142,7 @@ public class DataSeeder {
                               RolRepository rolRepo,
                               String passwordHash,
                               String nombre, String apellido,
-                              String correo, String nombreRol) {
+                              String correo, String nombreRol, String telegramChatId) {
         if (usuarioRepo.findByCorreo(correo).isEmpty()) {
             Rol rol = rolRepo.findByNombreRol(nombreRol)
                     .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + nombreRol));
@@ -153,12 +153,16 @@ public class DataSeeder {
             u.setPasswordHash(passwordHash);
             u.setActivo(true);
             u.setRol(rol);
+            u.setTelegramChatId(telegramChatId);
             usuarioRepo.save(u);
             log.info("✅ Usuario creado: {} [{}]", correo, nombreRol);
         } else {
             Usuario u = usuarioRepo.findByCorreo(correo).get();
             u.setPasswordHash(passwordHash);
             u.setActivo(true);
+            if (telegramChatId != null) {
+                u.setTelegramChatId(telegramChatId);
+            }
             usuarioRepo.save(u);
             log.info("ℹ️  Usuario ya existe. Contraseña actualizada y cuenta activada: {}", correo);
         }

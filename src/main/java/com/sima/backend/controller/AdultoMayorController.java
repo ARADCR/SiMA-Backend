@@ -48,7 +48,6 @@ public class AdultoMayorController {
                         adultoService.listarTodos()));
     }
 
-
     /** GET /adultos/{id} — Obtener un adulto por ID */
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<AdultoMayorResponse>> obtener(

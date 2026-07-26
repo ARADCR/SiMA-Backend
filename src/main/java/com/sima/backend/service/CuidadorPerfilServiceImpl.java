@@ -59,6 +59,7 @@ public class CuidadorPerfilServiceImpl implements CuidadorPerfilService {
         });
 
         usuario.setCorreo(nuevoCorreo);
+        usuario.setTelegramChatId(request.getTelegramChatId());
         usuarioRepository.save(usuario);
 
         PerfilCuidador perfil = perfilCuidadorRepository.findByIdUsuario(idUsuario)

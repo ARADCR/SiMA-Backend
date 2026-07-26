@@ -40,6 +40,9 @@ public class Usuario {
     @Column(name = "wechat_openid", unique = true, length = 100)
     private String wechatOpenid;
 
+    @Column(name = "telegram_chat_id", unique = true, length = 50)
+    private String telegramChatId;
+
     @Column(name = "activo", nullable = false)
     private Boolean activo = true;
 

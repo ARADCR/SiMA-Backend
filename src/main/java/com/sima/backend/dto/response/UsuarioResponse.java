@@ -23,6 +23,7 @@ public class UsuarioResponse {
     private Integer idRol;
     private String nombreRol;
     private String wechatOpenid;
+    private String telegramChatId;
     private Boolean activo;
     private LocalDateTime creadoEn;
     private LocalDateTime ultimoAcceso;
@@ -37,6 +38,7 @@ public class UsuarioResponse {
         dto.setIdRol(u.getRol().getIdRol());
         dto.setNombreRol(u.getRol().getNombreRol());
         dto.setWechatOpenid(u.getWechatOpenid());
+        dto.setTelegramChatId(u.getTelegramChatId());
         dto.setActivo(u.getActivo());
         dto.setCreadoEn(u.getCreadoEn());
         dto.setUltimoAcceso(u.getUltimoAcceso());

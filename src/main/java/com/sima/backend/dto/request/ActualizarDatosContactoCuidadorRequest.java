@@ -31,4 +31,7 @@ public class ActualizarDatosContactoCuidadorRequest {
 
     @Size(max = 2000)
     private String disponibilidad;
+
+    @Size(max = 50)
+    private String telegramChatId;
 }
